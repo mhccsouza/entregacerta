@@ -11,8 +11,8 @@ function topo(string $titulo, array $perfis = []): array {
         'pendencias.php' => ['Pendências', ['admin','rota','balcao']],
     ];
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
-    echo '<title>' . h($titulo) . ' – Central do Piso</title><link rel="stylesheet" href="style.css"></head><body>';
-    echo '<header class="no-print"><strong>Central do Piso</strong><nav>';
+    echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css"></head><body>';
+    echo '<header class="no-print"><strong>' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</strong><nav>';
     foreach ($menu as $arq => [$nome, $ok]) {
         if ($u['perfil'] === 'admin' || in_array($u['perfil'], $ok, true)) { echo '<a href="' . $arq . '">' . h($nome) . '</a>'; }
     }

@@ -2,6 +2,9 @@
 
 Projeto de Extensão I (ADS/UCSAL). PHP 8 + MySQL + HTML/CSS/JS, sem frameworks.
 
+## Reuso em outra loja
+O nome do sistema e da loja ficam em `inc/config.php` (`NOME_SISTEMA`, `NOME_LOJA`). Para outra loja do mesmo ramo, basta trocar esses valores no `config.local.php`, criar um banco novo e publicar em outro domínio. O fluxo (pedido, separação, rota, conferência) não depende de loja específica.
+
 ## O que faz (fluxo ponta a ponta)
 1. **Atendimento (`balcao`)** cadastra o pedido uma única vez: cliente, endereço, referência, telefone, data, vendedor e itens (US01).
 2. **Depósito (`deposito`)** vê a lista de separação do dia e marca o que foi separado; pode imprimir (US02).

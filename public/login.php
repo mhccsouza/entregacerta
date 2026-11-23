@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $erro = 'Usuário ou senha incorretos.';
 }
-?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar – Central do Piso</title><link rel="stylesheet" href="style.css"></head>
-<body><main style="max-width:380px"><h1>Central do Piso<br><small>Organização de entregas</small></h1>
+?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar – <?= h(NOME_SISTEMA) ?></title><link rel="stylesheet" href="style.css"></head>
+<body><main style="max-width:380px"><h1><?= h(NOME_SISTEMA) ?><br><small><?= h(NOME_LOJA) ?> · Organização de entregas</small></h1>
 <?php if ($erro): ?><p class="erro"><?= h($erro) ?></p><?php endif; ?>
 <form method="post" class="card"><?= csrf_campo() ?>
 <label for="login">Usuário</label><input id="login" name="login" autocomplete="username" required autofocus>
