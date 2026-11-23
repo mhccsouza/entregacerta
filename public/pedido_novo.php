@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../inc/layout.php';
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
 $u = topo('Novo pedido (entrega gratuita)', ['balcao']);
 $erros = [];
 $v = ['nome'=>'','telefone'=>'','endereco'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];

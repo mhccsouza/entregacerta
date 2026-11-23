@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../inc/layout.php';
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
 topo('Painel');
 $hoje = date('Y-m-d');
 $cont = q("SELECT status, COUNT(*) n FROM pedidos WHERE data_entrega = ? GROUP BY status", [$hoje])->fetchAll(PDO::FETCH_KEY_PAIR);

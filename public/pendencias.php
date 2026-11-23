@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../inc/layout.php';
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
 topo('Pendências de entrega', ['rota','balcao']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok();

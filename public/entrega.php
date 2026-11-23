@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../inc/layout.php';
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
 topo('Conferência da entrega', ['rota']);
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
 $p = q('SELECT p.*, c.nome, c.endereco, c.bairro FROM pedidos p JOIN clientes c ON c.id = p.cliente_id WHERE p.id = ?', [$id])->fetch();

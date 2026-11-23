@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../inc/layout.php';
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
 topo('Lista de separação', ['deposito']);
 $data = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['data'] ?? $_POST['data'] ?? '') ? ($_GET['data'] ?? $_POST['data']) : date('Y-m-d');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
