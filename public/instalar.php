@@ -7,8 +7,8 @@ $msg = ''; $feito = false;
 if ((int)q('SELECT COUNT(*) FROM usuarios')->fetchColumn() > 0) { $msg = 'Já instalado. Apague o arquivo instalar.php do servidor.'; $feito = true; }
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok(); $ok = true;
-    foreach ($perfis as $k => $_) { if (strlen($_POST['s_' . $k] ?? '') < 10) { $ok = false; } }
-    if (!$ok) { $msg = 'Cada senha precisa ter ao menos 10 caracteres.'; }
+    foreach ($perfis as $k => $_) { if (strlen($_POST['s_' . $k] ?? '') < 8) { $ok = false; } }
+    if (!$ok) { $msg = 'Cada senha precisa ter ao menos 8 caracteres.'; }
     else {
         foreach ($perfis as $k => $nome) { q('INSERT INTO usuarios (nome, login, senha_hash, perfil) VALUES (?,?,?,?)', [$nome, $k, password_hash($_POST['s_' . $k], PASSWORD_DEFAULT), $k]); }
         $msg = 'Usuários criados (logins: admin, balcao, deposito, rota). Agora APAGUE instalar.php do servidor.'; $feito = true;
