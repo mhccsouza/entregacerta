@@ -519,3 +519,4 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .fotos img{display:block;width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--linha)}
 .foto-item form{margin-top:4px}
 .erro[role=alert]{margin:10px 0}
+.nav-n{display:inline-block;min-width:1.3em;padding:0 .4em;margin-left:.25em;border-radius:99px;background:#f59e0b;color:#3b2300;font-size:.78rem;font-weight:700;text-align:center}

@@ -10,19 +10,22 @@ function topo(string $titulo, array $perfis = [], string $sub = ''): array {
         'separacao.php' => ['Separação', ['admin','deposito']],
         'rota.php' => ['Rota do dia', ['admin','rota']],
         'pendencias.php' => ['Pendências', ['admin','rota','balcao']],
+        'divergencias.php' => ['Divergências', ['admin','balcao']],
         'vendedores.php' => ['Vendedores', ['admin']],
         'usuarios.php' => ['Usuários', ['admin']],
     ];
     $perfil_nome = ['admin'=>'Administrador','balcao'=>'Atendimento','deposito'=>'Depósito','rota'=>'Rotas'];
     $atual = basename($_SERVER['SCRIPT_NAME'] ?? '');
-    $agrupa = ['entrega.php' => 'rota.php', 'historico.php' => 'pedidos.php', 'pedido_ver.php' => 'pedidos.php', 'divergencias.php' => 'pendencias.php'];
+    $agrupa = ['entrega.php' => 'rota.php', 'historico.php' => 'pedidos.php', 'pedido_ver.php' => 'pedidos.php'];
     $atual = $agrupa[$atual] ?? $atual;
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f4a24">';
     echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css?v=' . (int)@filemtime(dirname($_SERVER["SCRIPT_FILENAME"]) . "/style.css") . '"></head><body>';
     echo '<header class="topo no-print"><div class="topo-in"><a class="marca" href="index.php"><span class="logo" aria-hidden="true"></span><span>' . h(NOME_SISTEMA) . '<small>' . h(NOME_LOJA) . '</small></span></a><nav class="nav" aria-label="Menu principal">';
     foreach ($menu as $arq => [$nome, $ok]) {
         if ($u['perfil'] === 'admin' || in_array($u['perfil'], $ok, true)) {
-            echo '<a href="' . $arq . '"' . ($arq === $atual ? ' class="on" aria-current="page"' : '') . '>' . h($nome) . '</a>';
+            $n = '';
+            if ($arq === 'divergencias.php') { divergencia_garante(); $dn = (int)q('SELECT COUNT(*) FROM divergencias WHERE resolvida = 0')->fetchColumn(); $n = $dn ? ' <span class="nav-n">' . $dn . '</span>' : ''; }
+            echo '<a href="' . $arq . '"' . ($arq === $atual ? ' class="on" aria-current="page"' : '') . '>' . h($nome) . $n . '</a>';
         }
     }
     echo '</nav><div class="usuario"><span class="quem">' . h($u['nome']) . '<small>' . h($perfil_nome[$u['perfil']] ?? $u['perfil']) . '</small></span><a href="logout.php">Sair</a></div></div></header><main>';
