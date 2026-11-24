@@ -9,7 +9,7 @@ $de  = $data ?: ($ehData($_GET['de'] ?? '') ? $_GET['de'] : '');
 $ate = $data ?: ($ehData($_GET['ate'] ?? '') ? $_GET['ate'] : '');
 if ($de && $ate && $de > $ate) { [$de, $ate] = [$ate, $de]; }
 $status = (string)($_GET['status'] ?? '');
-$validos = ['aguardando','separado','em_rota','com_pendencia','entregue','cancelado','a_combinar'];
+$validos = ['aguardando','separado','em_rota','com_pendencia','entregue','cancelado','a_combinar','todos'];
 if (!in_array($status, $validos, true)) { $status = ''; }
 $prios = ['atrasado'=>'Atrasados','hoje'=>'Hoje','amanha'=>'Amanhã','semana'=>'Próximos 7 dias','adiante'=>'Mais adiante','combinar'=>'A combinar'];
 $prio = (string)($_GET['prio'] ?? ''); if (!isset($prios[$prio])) { $prio = ''; }
@@ -21,6 +21,7 @@ $w = []; $pr = [];
 if ($de)  { $w[] = 'p.data_entrega >= ?'; $pr[] = $de; }
 if ($ate) { $w[] = 'p.data_entrega <= ?'; $pr[] = $ate; }
 if ($status === 'a_combinar') { $w[] = "p.status NOT IN ('entregue','cancelado') AND p.data_entrega = ?"; $pr[] = A_COMBINAR; }
+elseif ($status === 'todos') { $w[] = "p.status <> 'cancelado'"; }
 elseif ($status) { $w[] = 'p.status = ?'; $pr[] = $status; }
 elseif (!$de && !$ate && !$prio) { $w[] = "p.status <> 'cancelado' AND (p.data_entrega >= ? OR p.status <> 'entregue')"; $pr[] = $hoje; }
 if ($prio) {
@@ -42,7 +43,7 @@ if ($busca !== '') {
 $onde = $w ? 'WHERE ' . implode(' AND ', $w) : '';
 $total = (int)q("SELECT COUNT(*) FROM pedidos p JOIN clientes c ON c.id = p.cliente_id $onde", $pr)->fetchColumn();
 $paginas = max(1, (int)ceil($total / $por)); $pag = min($pag, $paginas);
-$ordem = in_array($status, ['entregue','cancelado'], true) ? 'p.data_entrega DESC, p.id DESC' : 'p.data_entrega, p.id';
+$ordem = in_array($status, ['entregue','cancelado'], true) ? 'p.data_entrega DESC, p.id DESC' : ($status === 'todos' ? "CASE WHEN p.status = 'entregue' THEN 1 ELSE 0 END, p.data_entrega, p.id" : 'p.data_entrega, p.id');
 $ps = q("SELECT p.*, c.nome, c.endereco, c.bairro, c.telefone, c.referencia FROM pedidos p JOIN clientes c ON c.id = p.cliente_id $onde ORDER BY $ordem LIMIT $por OFFSET " . (($pag - 1) * $por), $pr)->fetchAll();
 // itens de todos os pedidos da pagina em UMA consulta
 $itens = []; $sepCont = [];
@@ -73,7 +74,7 @@ if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['blo
 <form method="get" class="no-print card filtros"><div class="grid">
 <div class="f-larga"><label for="busca">Buscar</label><input id="busca" type="search" name="busca" value="<?= h($busca) ?>" placeholder="Cliente, endereço, bairro ou nº"></div>
 <div><label for="vendedor">Vendedor</label><select id="vendedor" name="vendedor" onchange="this.form.submit()"><option value="">Todos</option><?php foreach ($nomesVend as $nv): ?><option value="<?= h($nv) ?>" <?= $vend === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select></div>
-<div><label for="status">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option>
+<div><label for="status">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option><option value="todos" <?= $status === 'todos' ? 'selected' : '' ?>>Todos (com entregues)</option>
 <?php foreach (['a_combinar'=>'Data a combinar','aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','com_pendencia'=>'Com pendência','entregue'=>'Entregue','cancelado'=>'Cancelado'] as $k => $n): ?><option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= h($n) ?></option><?php endforeach; ?></select></div>
 <div><label for="de">Entrega de</label><div class="data-w<?= $de ? '' : ' sem-data' ?>"><input id="de" type="date" name="de" value="<?= h($de) ?>"><span class="ph" aria-hidden="true">Escolher data</span></div></div>
 <div><label for="ate">até</label><div class="data-w<?= $ate ? '' : ' sem-data' ?>"><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"><span class="ph" aria-hidden="true">Escolher data</span></div></div></div>
