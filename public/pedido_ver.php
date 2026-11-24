@@ -12,6 +12,7 @@ $pend = q('SELECT * FROM pendencias WHERE pedido_id = ? ORDER BY id', [$id])->fe
 $pendItem = []; foreach ($pend as $x) { if (!$x['resolvida']) { $pendItem[$x['item_id']] = true; } }
 $dt = fn($x) => $x ? date('d/m/Y H:i', strtotime($x)) : '';
 ?>
+<style>@media print{.cabeca{display:none}}</style>
 <div class="acoes-topo no-print"><a class="btn sec" href="<?= $voltar[0] ?>"><?= $voltar[1] ?></a><button type="button" onclick="window.print()">Imprimir 2ª via</button></div>
 <article class="card via">
 <div class="via-cab"><div><p class="via-loja"><?= h(NOME_LOJA) ?> · <?= h(NOME_SISTEMA) ?></p><h2>Pedido #<?= (int)$p['id'] ?> <small>2ª via</small></h2></div><?= stag($p['status']) ?></div>
@@ -21,7 +22,7 @@ $dt = fn($x) => $x ? date('d/m/Y H:i', strtotime($x)) : '';
 <div class="largo"><dt>Endereço</dt><dd><?= h($p['endereco']) ?><?= $p['bairro'] ? ' – ' . h($p['bairro']) : '' ?><?= $p['referencia'] ? '<br>Ref.: ' . h($p['referencia']) : '' ?></dd></div>
 <div><dt>Data da entrega</dt><dd><?= data_br($p['data_entrega']) ?></dd></div>
 <div><dt>Vendedor</dt><dd><?= h($p['vendedor']) ?></dd></div>
-<?php if ($p['rota_id']): ?><div><dt>Rota</dt><dd><?= h($p['rota_nome']) ?> · <?= data_br($p['data_rota']) ?><?= $p['ordem_rota'] ? ' · parada ' . (int)$p['ordem_rota'] : '' ?></dd></div><?php endif; ?>
+<?php if ($p['rota_id']): ?><div><dt>Rota</dt><dd><?= h($p['rota_nome']) ?><?= $p['ordem_rota'] ? ' · parada ' . (int)$p['ordem_rota'] : '' ?></dd></div><?php endif; ?>
 <div><dt>Cadastrado em</dt><dd><?= $dt($p['criado_em']) ?><?= $p['cadastrado_por'] ? ' por ' . h($p['cadastrado_por']) : '' ?></dd></div>
 </dl>
 <h3>Itens</h3>

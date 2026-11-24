@@ -201,9 +201,10 @@ table.rota input[type=text],table.rota input:not([type=checkbox]){max-width:80px
 
 /* ---------- Impressão ---------- */
 @media print{
+  @page{margin:0}
   .no-print,.topo,.barra-fixa{display:none!important}
   body{background:#fff;font-size:12pt}
-  main{max-width:none;padding:0}
+  main{max-width:none;padding:14mm 15mm}
   .card{box-shadow:none;border:1px solid #000;break-inside:avoid}
   .tag{border:1px solid #000;background:#fff!important;color:#000!important}
   .cards{display:block}
