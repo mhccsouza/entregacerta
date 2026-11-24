@@ -46,15 +46,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$erros) {
         $pdo = db(); $pdo->beginTransaction();
         try {
+            // Cliente: nunca altera o cadastro que outros pedidos já usam (o endereço de pedidos antigos não pode mudar).
+            // - editando um pedido cujo cliente só tem ele: corrige o cadastro no lugar;
+            // - senão: reaproveita o cliente com o MESMO nome, telefone e endereço; se o endereço (ou o telefone) é outro, cria um cadastro novo.
             $cid = null;
-            // cliente que já existe (mesmo nome e telefone; sem telefone, mesmo nome e endereço) é reaproveitado, sem duplicar
-            $c = $v['telefone'] !== ''
-                ? q('SELECT id FROM clientes WHERE telefone = ? AND nome = ? ORDER BY id DESC LIMIT 1', [$v['telefone'], $v['nome']])->fetch()
-                : q("SELECT id FROM clientes WHERE (telefone IS NULL OR telefone = '') AND nome = ? AND endereco = ? ORDER BY id DESC LIMIT 1", [$v['nome'], $v['endereco']])->fetch();
-            if ($c) { $cid = (int)$c['id']; q('UPDATE clientes SET endereco=?, bairro=?, referencia=? WHERE id=?', [$v['endereco'],$v['bairro'],$v['referencia'],$cid]); }
-            if (!$cid) {
-                q('INSERT INTO clientes (nome, telefone, endereco, bairro, referencia) VALUES (?,?,?,?,?)', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia']]);
-                $cid = (int)$pdo->lastInsertId();
+            $atual = $id ? (int)q('SELECT cliente_id FROM pedidos WHERE id = ?', [$id])->fetchColumn() : 0;
+            if ($atual && (int)q('SELECT COUNT(*) FROM pedidos WHERE cliente_id = ?', [$atual])->fetchColumn() === 1) {
+                $cid = $atual;
+                q('UPDATE clientes SET nome=?, telefone=?, endereco=?, bairro=?, referencia=? WHERE id=?', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia'],$cid]);
+            } else {
+                $c = q("SELECT id FROM clientes WHERE nome = ? AND COALESCE(telefone, '') = ? AND endereco = ? ORDER BY id DESC LIMIT 1", [$v['nome'], $v['telefone'], $v['endereco']])->fetch();
+                if ($c) { $cid = (int)$c['id']; q('UPDATE clientes SET bairro=?, referencia=? WHERE id=?', [$v['bairro'],$v['referencia'],$cid]); }
+                else {
+                    q('INSERT INTO clientes (nome, telefone, endereco, bairro, referencia) VALUES (?,?,?,?,?)', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia']]);
+                    $cid = (int)$pdo->lastInsertId();
+                }
             }
             if ($id) {
                 q('UPDATE pedidos SET cliente_id = ?, vendedor = ?, data_entrega = ?, observacao = ? WHERE id = ?', [$cid,$v['vendedor'],$v['data_entrega'],$v['observacao'],$id]);
