@@ -44,7 +44,9 @@ function grupo_prazo(string $d, string $status): string {
     return ['p-atrasado'=>'Atrasados','p-hoje'=>'Hoje','p-amanha'=>'Amanhã','p-semana'=>'Próximos 7 dias','p-combinar'=>'Data a combinar'][$c] ?? 'Mais adiante';
 }
 function link_pag(int $n): string { $g = $_GET; $g['pag'] = $n; return 'pedidos.php?' . http_build_query($g); }
-$nomesVend = q('SELECT nome FROM vendedores UNION SELECT DISTINCT vendedor FROM pedidos ORDER BY 1')->fetchAll(PDO::FETCH_COLUMN);
+$nomesVend = array_column(vendedores(), 'nome'); // garante a tabela de vendedores
+foreach (q("SELECT DISTINCT vendedor FROM pedidos WHERE vendedor <> ''")->fetchAll(PDO::FETCH_COLUMN) as $n) { if (!in_array($n, $nomesVend, true)) { $nomesVend[] = $n; } }
+sort($nomesVend, SORT_NATURAL | SORT_FLAG_CASE);
 $filtrado = $de || $ate || $status || $vend !== '' || $busca !== '';
 if (!empty($_GET['ok'])): ?><p class="ok">Pedido #<?= (int)$_GET['ok'] ?> salvo.</p><?php endif;
 if (!empty($_GET['excluido'])): ?><p class="ok">Pedido #<?= (int)$_GET['excluido'] ?> excluído.</p><?php endif;
