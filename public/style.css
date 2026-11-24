@@ -244,3 +244,16 @@ table.rota input[type=text],table.rota input:not([type=checkbox]){max-width:80px
   .c-st{grid-area:s;justify-self:end}.c-nome{grid-area:n}.c-bairro{grid-area:b}.c-itens{grid-area:i;justify-self:end}
 }
 input:disabled{background:#e4e7e1;color:#8a948c;cursor:not-allowed}
+
+/* ---------- Pedidos em cartões, agrupados por prazo ---------- */
+.grupo-tit{display:flex;align-items:center;gap:10px;font-size:1rem;margin:22px 0 10px}
+.grupo-tit::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--rejunte)}
+.grupo-tit.p-atrasado::before{background:var(--com_pendencia)}.grupo-tit.p-hoje::before{background:var(--aguardando)}
+.grupo-tit.p-amanha::before{background:#d4a017}.grupo-tit.p-semana::before{background:var(--separado)}.grupo-tit.p-combinar::before{background:#8a93a0}
+.ped-card{border-left:6px solid var(--rejunte)}
+.ped-card.p-atrasado{border-left-color:var(--com_pendencia)}.ped-card.p-hoje{border-left-color:var(--aguardando)}
+.ped-card.p-amanha{border-left-color:#d4a017}.ped-card.p-semana{border-left-color:var(--separado)}.ped-card.p-combinar{border-left-color:#8a93a0}
+.ped-card .c-data b{font-size:1.05rem;font-variant-numeric:tabular-nums}
+.ped-card.p-combinar .c-data b{color:#4b5563}
+.ped-nome{margin:8px 0 2px;font-size:1.02rem}
+details.mais summary{cursor:pointer;color:var(--verde);font-size:.88rem;padding:2px 0}
