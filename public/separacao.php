@@ -63,7 +63,7 @@ $entrega = '<b>Entrega: ' . data_br($p['data_entrega']) . '</b>' . ($pz && $p['d
 <div class="check <?= $i['separado'] ? 'feito' : '' ?>"><input type="checkbox" name="sep[]" value="<?= $i['id'] ?>" id="i<?= $i['id'] ?>" <?= $i['separado'] ? 'checked' : '' ?>>
 <span class="qtd"><?= qtd_fmt($i['quantidade']) ?> <?= h($i['unidade']) ?></span><label for="i<?= $i['id'] ?>" class="txt"><?= h($i['descricao']) ?></label></div><?php endforeach; ?></div>
 <div class="foco-acoes no-print">
-<button type="submit" name="foco" value="<?= $p['id'] ?>">Salvar e voltar à lista</button>
+<button type="submit" name="foco" value="<?= $p['id'] ?>">Salvar e voltar</button>
 <button type="button" class="sec todos">Marcar todos</button>
 <a class="btn sec" href="separacao_imprimir.php?ped=<?= (int)$p['id'] ?>" target="_blank" rel="noopener">Imprimir este pedido</a>
 <button type="button" class="sec fechar">Cancelar</button>

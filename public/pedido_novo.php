@@ -77,7 +77,7 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <div class="card"><h2>Cliente e endereço</h2><div class="grid grid-end">
 <div class="g-nome"><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
 <div class="g-tel"><label for="telefone">Telefone / WhatsApp</label><input id="telefone" name="telefone" inputmode="tel" placeholder="(71) 99999-0000" maxlength="16" value="<?= h($v['telefone']) ?>"></div>
-<div class="g-cep"><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche rua e bairro.</p></div>
+<div class="g-cep"><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="off"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche rua e bairro.</p></div>
 <div class="g-rua"><label class="req" for="rua">Rua</label><input id="rua" name="rua" value="<?= h($v['rua']) ?>" autocomplete="off" required></div>
 <div class="g-num"><label class="req" for="numero">Número</label><input id="numero" name="numero" value="<?= h($v['numero']) ?>" maxlength="12" placeholder="s/n" autocomplete="off" required></div>
 <div class="g-comp"><label for="complemento">Complemento <span class="nota sem-margem">(opcional)</span></label><input id="complemento" name="complemento" value="<?= h($v['complemento']) ?>" maxlength="60" placeholder="Ex.: apto 302, bloco B" autocomplete="off"></div>

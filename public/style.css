@@ -466,7 +466,7 @@ input,select,textarea,button{font-family:inherit}
 .sep-resumo:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}
 .sep-resumo.completo{border-left-color:#1c7a3c}
 .sep-resumo .abrir{display:block;margin-top:8px;color:var(--verde,#14532d);font-weight:700;font-size:.95rem}
-.sep-resumo.completo .abrir::before{content:"\2713\00a0Completo \00b7\00a0"}
+.sep-resumo.completo .abrir::before{content:"\2713\0000a0Completo\0000a0\0000b7\0000a0"}
 .sep-foco{display:none}
 .sep-fundo{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,30,20,.6);z-index:200}
 .sep-fundo.on{display:block}
