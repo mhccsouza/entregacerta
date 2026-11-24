@@ -447,8 +447,8 @@ input,select,textarea,button{font-family:inherit}
 .aviso-novo[hidden]{display:none}
 .aviso-novo button{background:#fff;color:#0f4a24;min-height:38px;padding:0 14px;border:0;border-radius:8px;font-weight:700;cursor:pointer;margin:0}
 .alertas{margin:0 0 18px}
-.alertas ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
-.alertas .al a{display:flex;align-items:center;gap:12px;padding:11px 14px;background:#fff;border:1px solid #d5dbd2;border-left:6px solid var(--cor,#64748b);border-radius:10px;color:inherit;text-decoration:none}
+.alertas ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.alertas .al a{display:flex;align-items:center;gap:12px;height:100%;padding:11px 14px;line-height:1.25;background:#fff;border:1px solid #d5dbd2;border-left:6px solid var(--cor,#64748b);border-radius:10px;color:inherit;text-decoration:none}
 .alertas .al a:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .alertas .al b{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--cor,#64748b);color:#fff;font-size:.85rem;padding:0 8px;flex:none}
 .alertas .ok-tudo{padding:12px 14px;background:#e8f5ec;border-radius:10px;color:#14532d;margin:8px 0 0}
