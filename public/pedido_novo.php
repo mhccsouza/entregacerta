@@ -47,10 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = db(); $pdo->beginTransaction();
         try {
             $cid = null;
-            if ($v['telefone'] !== '') {
-                $c = q('SELECT id FROM clientes WHERE telefone = ? AND nome = ? ORDER BY id DESC LIMIT 1', [$v['telefone'], $v['nome']])->fetch();
-                if ($c) { $cid = (int)$c['id']; q('UPDATE clientes SET endereco=?, bairro=?, referencia=? WHERE id=?', [$v['endereco'],$v['bairro'],$v['referencia'],$cid]); }
-            }
+            // cliente que já existe (mesmo nome e telefone; sem telefone, mesmo nome e endereço) é reaproveitado, sem duplicar
+            $c = $v['telefone'] !== ''
+                ? q('SELECT id FROM clientes WHERE telefone = ? AND nome = ? ORDER BY id DESC LIMIT 1', [$v['telefone'], $v['nome']])->fetch()
+                : q("SELECT id FROM clientes WHERE (telefone IS NULL OR telefone = '') AND nome = ? AND endereco = ? ORDER BY id DESC LIMIT 1", [$v['nome'], $v['endereco']])->fetch();
+            if ($c) { $cid = (int)$c['id']; q('UPDATE clientes SET endereco=?, bairro=?, referencia=? WHERE id=?', [$v['endereco'],$v['bairro'],$v['referencia'],$cid]); }
             if (!$cid) {
                 q('INSERT INTO clientes (nome, telefone, endereco, bairro, referencia) VALUES (?,?,?,?,?)', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia']]);
                 $cid = (int)$pdo->lastInsertId();
@@ -75,7 +76,7 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <?php foreach ($erros as $e): ?><p class="erro" role="alert"><?= h($e) ?></p><?php endforeach; ?>
 <form method="post" id="form-pedido" novalidate><?= csrf_campo() ?><?php if ($id): ?><input type="hidden" name="id" value="<?= $id ?>"><?php endif; ?>
 <div class="card"><h2>Cliente e endereço</h2><div class="grid grid-end">
-<div class="g-nome"><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
+<div class="g-nome busca-cli"><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
 <div class="g-tel"><label for="telefone">Telefone / WhatsApp</label><input id="telefone" name="telefone" inputmode="tel" placeholder="(71) 99999-0000" maxlength="16" value="<?= h($v['telefone']) ?>"></div>
 <div class="g-cep"><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="off"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche rua e bairro.</p></div>
 <div class="g-rua"><label class="req" for="rua">Rua</label><input id="rua" name="rua" value="<?= h($v['rua']) ?>" autocomplete="off" required></div>
@@ -157,4 +158,33 @@ document.getElementById('form-pedido').addEventListener('submit',function(e){
  if(falta){e.preventDefault();falta.focus()}});
 })();
 </script>
+<?php if (!$id): ?><script>
+// Cliente já cadastrado: ao digitar o nome (ou telefone), sugere os clientes salvos e preenche o endereço.
+(function(){
+var nome=document.getElementById('nome'),tel=document.getElementById('telefone');if(!nome)return;
+var box=document.createElement('ul');box.className='sugestoes';box.setAttribute('role','listbox');box.hidden=true;nome.parentNode.appendChild(box);
+nome.setAttribute('autocomplete','off');var t=null,ult='';
+function fecha(){box.hidden=true;box.innerHTML=''}
+function ev(el){el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}
+function escolhe(c){
+  [['nome','nome'],['telefone','telefone'],['rua','rua'],['numero','numero'],['complemento','complemento'],['bairro','bairro'],['referencia','referencia']].forEach(function(p){var el=document.getElementById(p[0]);if(el){el.value=c[p[1]]||'';ev(el)}});
+  fecha();var v=document.getElementById('vendedor');if(v)v.focus();
+  var av=document.getElementById('aviso-cli');if(!av){av=document.createElement('p');av.id='aviso-cli';av.className='nota';av.setAttribute('role','status');box.parentNode.appendChild(av)}
+  av.textContent='Cliente já cadastrado: dados preenchidos. Confira o endereço antes de salvar.';
+}
+function busca(q){
+  fetch('clientes_busca.php?q='+encodeURIComponent(q),{credentials:'same-origin'}).then(function(r){return r.ok?r.json():[]}).then(function(l){
+    if(q!==ult)return;box.innerHTML='';if(!l.length){box.hidden=true;return}
+    l.forEach(function(c){var li=document.createElement('li');li.setAttribute('role','option');var b=document.createElement('button');b.type='button';
+      var s1=document.createElement('strong');s1.textContent=c.nome;var s2=document.createElement('span');s2.textContent=[c.telefone,[c.rua,c.numero].filter(Boolean).join(', '),c.bairro].filter(Boolean).join(' · ');
+      b.appendChild(s1);b.appendChild(s2);b.addEventListener('mousedown',function(e){e.preventDefault()});b.addEventListener('click',function(){escolhe(c)});li.appendChild(b);box.appendChild(li)});
+    box.hidden=false}).catch(fecha)}
+function digitou(el){var q=el.value.trim();ult=q;clearTimeout(t);if(q.length<2){fecha();return}t=setTimeout(function(){busca(q)},200)}
+nome.addEventListener('input',function(){digitou(nome)});
+if(tel)tel.addEventListener('input',function(){if(tel.value.replace(/\D/g,'').length>=3)digitou(tel);});
+nome.addEventListener('keydown',function(e){if(e.key==='Escape')fecha();if(e.key==='ArrowDown'&&!box.hidden){var b=box.querySelector('button');if(b){e.preventDefault();b.focus()}}});
+box.addEventListener('keydown',function(e){var b=document.activeElement;if(e.key==='ArrowDown'){var n=b.closest('li').nextElementSibling;if(n){e.preventDefault();n.querySelector('button').focus()}}else if(e.key==='ArrowUp'){var p=b.closest('li').previousElementSibling;e.preventDefault();(p?p.querySelector('button'):nome).focus()}else if(e.key==='Escape'){fecha();nome.focus()}});
+document.addEventListener('click',function(e){if(!box.contains(e.target)&&e.target!==nome&&e.target!==tel)fecha()});
+})();
+</script><?php endif; ?>
 <?php rodape();
