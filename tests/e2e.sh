@@ -68,3 +68,16 @@ php tests/sql.php -q "select 'depois: pedido $CID '||status||' | '||observacao a
 echo "some da separacao:"; curl -s -b /tmp/c2 "$B/separacao.php?data=$D3" | grep -c "Pedido #$CID"
 echo "some da lista geral:"; curl -s -b /tmp/c1 "$B/pedidos.php" | grep -c "#$CID ·"
 echo "entregue nao cancela:"; curl -s -b /tmp/ad -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=1&motivo=x" $B/pedido_cancelar.php
+echo "-- ADMIN EXCLUI QUALQUER PEDIDO (limpeza de testes):"
+D4=$(date -d "+5 day" +%F)
+T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
+curl -s -b /tmp/c1 -o /dev/null --data-urlencode "csrf=$T" --data-urlencode "nome=Teste Limpeza" --data-urlencode "telefone=71900000099" --data-urlencode "endereco=Rua Lixo" --data-urlencode "vendedor=Ione" --data-urlencode "data_entrega=$D4" --data-urlencode "qtd[]=1" --data-urlencode "un[]=un" --data-urlencode "desc[]=Item teste" $B/pedido_novo.php
+LID=$(php tests/sql.php -q "select max(id) as m from pedidos")
+curl -s -b /tmp/c3 "$B/rota.php?data=$D4" > /tmp/r.html; T=$(tok </tmp/r.html)
+curl -s -b /tmp/c3 -o /dev/null --data "csrf=$T&data=$D4&pedido[]=$LID&ordem[$LID]=1" $B/rota.php
+php tests/sql.php -q "select 'pedido $LID '||status||' rota '||coalesce(rota_id,'-') as s from pedidos where id=$LID"
+T=$(tok < <(curl -s -b /tmp/c1 $B/pedidos.php))
+echo "balcao tenta excluir pedido em rota (bloqueado):"; curl -s -b /tmp/c1 -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=$LID" $B/pedido_excluir.php
+echo "admin ve botao definitivo:"; curl -s -b /tmp/ad "$B/pedidos.php?data=$D4" > /tmp/p.html; grep -c 'Excluir definitivamente' /tmp/p.html; T=$(tok </tmp/p.html)
+curl -s -b /tmp/ad -o /dev/null -w "admin exclui: %{redirect_url}\n" -d "csrf=$T&id=$LID" $B/pedido_excluir.php
+php tests/sql.php -q "select 'pedido='||(select count(*) from pedidos where id=$LID)||' itens='||(select count(*) from itens_pedido where pedido_id=$LID)||' clientes teste='||(select count(*) from clientes where nome='Teste Limpeza')||' rotas vazias='||(select count(*) from rotas where id not in (select rota_id from pedidos where rota_id is not null)) as s"
