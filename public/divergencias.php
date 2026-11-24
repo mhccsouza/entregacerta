@@ -2,13 +2,28 @@
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
 require_once INC . '/layout.php';
 $u0 = exige_login(['balcao']);
-divergencia_garante();
+divergencia_garante(); pendencia_qtd_garante();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok();
     $d = q('SELECT * FROM divergencias WHERE id = ? AND resolvida = 0', [(int)($_POST['id'] ?? 0)])->fetch();
     if ($d) {
         $corrige = ($_POST['acao'] ?? '') === 'corrigir';
         if ($corrige) { q('UPDATE itens_pedido SET quantidade = ? WHERE id = ?', [$d['qtd_real'], $d['item_id']]); }
+        else { // verificado: a quantidade certa era a cadastrada. Refaz a pendência em aberto (se houver) sobre ela.
+            $pe = q('SELECT id, qtd_falta FROM pendencias WHERE item_id = ? AND resolvida = 0', [$d['item_id']])->fetch();
+            if ($pe) {
+                $entregue = $pe['qtd_falta'] !== null ? max(0.0, (float)$d['qtd_real'] - (float)$pe['qtd_falta']) : 0.0;
+                $falta = round((float)$d['qtd_pedido'] - $entregue, 2);
+                if ($falta > 0) { q('UPDATE pendencias SET qtd_falta = ? WHERE id = ?', [$falta, $pe['id']]); }
+                else {
+                    q('UPDATE pendencias SET resolvida = 1 WHERE id = ?', [$pe['id']]);
+                    q('UPDATE itens_pedido SET conferido = 1 WHERE id = ?', [$d['item_id']]);
+                    if (!(int)q('SELECT COUNT(*) FROM pendencias WHERE pedido_id = ? AND resolvida = 0', [$d['pedido_id']])->fetchColumn()) {
+                        q("UPDATE pedidos SET status = 'entregue' WHERE id = ? AND status = 'com_pendencia'", [$d['pedido_id']]);
+                    }
+                }
+            }
+        }
         q('UPDATE divergencias SET resolvida = 1, resolucao = ?, resolvida_em = ' . (strpos(DB_DSN, 'sqlite') === 0 ? 'CURRENT_TIMESTAMP' : 'NOW()') . ' WHERE id = ?', [$corrige ? 'corrigido' : 'mantido', $d['id']]);
     }
     header('Location: divergencias.php'); exit;
