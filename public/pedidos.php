@@ -65,6 +65,7 @@ sort($nomesVend, SORT_NATURAL | SORT_FLAG_CASE);
 $cont = q("SELECT SUM(CASE WHEN data_entrega < ? THEN 1 ELSE 0 END) a, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) h, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) m, SUM(CASE WHEN data_entrega BETWEEN ? AND ? THEN 1 ELSE 0 END) s, SUM(CASE WHEN data_entrega > ? AND data_entrega <> ? THEN 1 ELSE 0 END) f, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) c FROM pedidos WHERE status NOT IN ('entregue','cancelado')", [$hoje, $hoje, $d1, $d2, $d7, $d7, A_COMBINAR, A_COMBINAR])->fetch();
 $contagem = ['atrasado'=>(int)$cont['a'],'hoje'=>(int)$cont['h'],'amanha'=>(int)$cont['m'],'semana'=>(int)$cont['s'],'adiante'=>(int)$cont['f'],'combinar'=>(int)$cont['c']];
 $classe = ['atrasado'=>'p-atrasado','hoje'=>'p-hoje','amanha'=>'p-amanha','semana'=>'p-semana','adiante'=>'p-mais','combinar'=>'p-combinar'];
+$entregues = (int)q("SELECT COUNT(*) FROM pedidos WHERE status = 'entregue'")->fetchColumn();
 $filtrado = $prio || $de || $ate || $status || $vend !== '' || $busca !== '';
 if (!empty($_GET['ok'])): ?><p class="ok">Pedido #<?= (int)$_GET['ok'] ?> salvo.</p><?php endif;
 if (!empty($_GET['excluido'])): ?><p class="ok">Pedido #<?= (int)$_GET['excluido'] ?> excluído.</p><?php endif;
@@ -80,7 +81,7 @@ if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['blo
 <div><label for="ate">até</label><div class="data-w<?= $ate ? '' : ' sem-data' ?>"><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"><span class="ph" aria-hidden="true">Escolher data</span></div></div></div>
 <div class="prio-barra" role="group" aria-label="Filtrar por prioridade"><?php foreach ($prios as $k => $nome): $on = $prio === $k;
 $q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $status, 'busca' => $busca, 'de' => $de, 'ate' => $ate]); ?>
-<a class="prio <?= $classe[$k] ?><?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php' . ($q2 ? '?' . http_build_query($q2) : '')) ?>"><i></i><?= h($nome) ?><b><?= $contagem[$k] ?></b></a><?php endforeach; ?></div>
+<a class="prio <?= $classe[$k] ?><?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php' . ($q2 ? '?' . http_build_query($q2) : '')) ?>"><i></i><?= h($nome) ?><b><?= $contagem[$k] ?></b></a><?php endforeach; ?><a class="prio p-entregue" href="historico.php" title="Ver o histórico de pedidos entregues"><i></i>Entregues<b><?= $entregues ?></b></a></div>
 <div class="barra"><button class="peq">Filtrar</button><?php if ($filtrado): ?><a class="btn sec peq" href="pedidos.php">Limpar filtros</a><?php endif; ?>
 <span class="nota sem-margem"><?= $total ?> <?= $total === 1 ? 'pedido' : 'pedidos' ?><?= $vend !== '' ? ' de ' . h($vend) : '' ?></span></div></form>
 <?php if (!$ps): ?><div class="vazio"><p>Nenhum pedido encontrado.</p><?php if (in_array($u['perfil'], ['admin','balcao'], true)): ?><a class="btn" href="pedido_novo.php">+ Cadastrar pedido</a><?php endif; ?></div><?php endif; ?>
@@ -103,11 +104,11 @@ $pode_ed = in_array($u['perfil'], ['admin','balcao'], true) && $elegivel;
 $pode_conf = in_array($p['status'], ['em_rota','com_pendencia'], true);
 $pode_canc = $u['perfil'] === 'admin' && in_array($p['status'], ['aguardando','separado','em_rota'], true);
 $pode_exc_adm = $u['perfil'] === 'admin' && !$elegivel; ?>
-<?php if ($pode_ed || $pode_conf): ?><div class="acoes-card no-print">
+<div class="acoes-card no-print"><a class="btn sec peq" href="pedido_ver.php?id=<?= $p['id'] ?>">Ver / 2ª via</a>
 <?php if ($pode_conf): ?><a class="btn peq" href="entrega.php?id=<?= $p['id'] ?>">Conferir entrega</a><?php endif; ?>
 <?php if ($pode_ed): ?><a class="btn sec peq" href="pedido_novo.php?id=<?= $p['id'] ?>"><?= $p['data_entrega'] === A_COMBINAR ? 'Definir data / editar' : 'Editar' ?></a>
 <form method="post" action="pedido_excluir.php" onsubmit="return confirm('Excluir o pedido #<?= $p['id'] ?>? Não é possível desfazer.')"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= $p['id'] ?>"><button class="perigo peq">Excluir</button></form><?php endif; ?>
-</div><?php endif; ?>
+</div>
 <?php if ($pode_canc || $pode_exc_adm): ?><details class="admin no-print"><summary>Opções do administrador</summary>
 <?php if ($pode_canc): ?><form method="post" action="pedido_cancelar.php" onsubmit="return confirm('Cancelar o pedido #<?= $p['id'] ?>? Ele sairá da separação e da rota.')"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= $p['id'] ?>">
 <label for="m<?= $p['id'] ?>">Cancelar pedido (desistência) – motivo</label><input id="m<?= $p['id'] ?>" name="motivo" required maxlength="120" placeholder="Ex.: cliente desistiu da compra"><p><button class="sec peq">Cancelar pedido</button></p></form><?php endif; ?>

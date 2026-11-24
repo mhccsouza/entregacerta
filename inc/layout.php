@@ -15,7 +15,7 @@ function topo(string $titulo, array $perfis = [], string $sub = ''): array {
     ];
     $perfil_nome = ['admin'=>'Administrador','balcao'=>'Atendimento','deposito'=>'Depósito','rota'=>'Rotas'];
     $atual = basename($_SERVER['SCRIPT_NAME'] ?? '');
-    $agrupa = ['entrega.php' => 'rota.php'];
+    $agrupa = ['entrega.php' => 'rota.php', 'historico.php' => 'pedidos.php', 'pedido_ver.php' => 'pedidos.php'];
     $atual = $agrupa[$atual] ?? $atual;
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f4a24">';
     echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css?v=' . (int)@filemtime(dirname($_SERVER["SCRIPT_FILENAME"]) . "/style.css") . '"></head><body>';
