@@ -29,4 +29,11 @@ function topo(string $titulo, array $perfis = [], string $sub = ''): array {
     echo '<div class="cabeca"><div><h1>' . h($titulo) . '</h1>' . ($sub !== '' ? '<p class="sub">' . h($sub) . '</p>' : '') . '</div></div>';
     return $u;
 }
-function rodape(): void { echo '</main></body></html>'; }
+function rodape(): void {
+    $arq = basename($_SERVER['SCRIPT_NAME'] ?? '');
+    if (usuario() && !in_array($arq, ['pedido_novo.php', 'entrega.php', 'instalar.php'], true)) {
+        echo '<div id="aviso-novo" class="aviso-novo no-print" role="status" aria-live="polite" hidden><span>Há pedidos novos ou alterados por outro usuário.</span><button type="button" onclick="location.reload()">Atualizar</button></div>';
+        echo '<script>(function(){var v=null;function chk(){if(document.hidden)return;fetch("novidades.php",{credentials:"same-origin",cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){if(!d||!d.ok)return;if(v===null){v=d.v}else if(d.v!==v){document.getElementById("aviso-novo").hidden=false}}).catch(function(){})}chk();setInterval(chk,20000);document.addEventListener("visibilitychange",function(){if(!document.hidden)chk()})})();</script>';
+    }
+    echo '</main></body></html>';
+}

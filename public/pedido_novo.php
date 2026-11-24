@@ -73,6 +73,7 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <div class="card"><h2>Cliente e endereço</h2><div class="grid">
 <div><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
 <div><label for="telefone">Telefone / WhatsApp</label><input id="telefone" name="telefone" inputmode="tel" placeholder="(71) 99999-0000" maxlength="16" value="<?= h($v['telefone']) ?>"></div>
+<div><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche o endereço e o bairro sozinho.</p></div>
 <div><label class="req" for="endereco">Endereço (rua e número)</label><input id="endereco" name="endereco" value="<?= h($v['endereco']) ?>" autocomplete="off" required></div>
 <div><label for="bairro">Bairro</label><input id="bairro" name="bairro" list="bairros" value="<?= h($v['bairro']) ?>" autocomplete="off"><datalist id="bairros"><?php foreach (q("SELECT DISTINCT bairro FROM clientes WHERE bairro <> '' ORDER BY bairro")->fetchAll(PDO::FETCH_COLUMN) as $b): ?><option value="<?= h($b) ?>"><?php endforeach; ?></datalist></div>
 </div>
@@ -120,6 +121,18 @@ var tel=document.getElementById('telefone');
 tel.addEventListener('input',function(){var d=tel.value.replace(/\D/g,'').slice(0,11),r=d;
  if(d.length>10){r='('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7)}else if(d.length>6){r='('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6)}else if(d.length>2){r='('+d.slice(0,2)+') '+d.slice(2)}else if(d.length){r='('+d}
  tel.value=r});
+// CEP (opcional): preenche rua e bairro pelo ViaCEP; se falhar, o preenchimento manual continua valendo
+var cep=document.getElementById('cep'),cepMsg=document.getElementById('cep-msg'),cepUlt='';
+cep.addEventListener('input',function(){var d=cep.value.replace(/\D/g,'').slice(0,8);cep.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;
+ if(d.length<8){cepUlt='';return}if(d===cepUlt)return;cepUlt=d;cepMsg.textContent='Buscando o CEP...';
+ var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort()},6000);
+ fetch('https://viacep.com.br/ws/'+d+'/json/',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){clearTimeout(tm);
+  if(j.erro){cepMsg.textContent='CEP não encontrado. Preencha o endereço manualmente.';return}
+  var en=document.getElementById('endereco'),ba=document.getElementById('bairro');
+  if(!en.value.trim()&&j.logradouro){en.value=j.logradouro+', ';}
+  if(!ba.value.trim()&&j.bairro){ba.value=j.bairro;}
+  cepMsg.textContent='Endereço preenchido. Confira e informe o número.';if(!en.value.trim()||/, $/.test(en.value)){en.focus();en.setSelectionRange(en.value.length,en.value.length)}
+ }).catch(function(){clearTimeout(tm);cepMsg.textContent='Não foi possível consultar o CEP agora. Preencha o endereço manualmente.'})});
 // atalhos de data
 var dt=document.getElementById('data_entrega');
 function iso(x){var d=new Date();d.setDate(d.getDate()+x);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
