@@ -509,3 +509,13 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .parcial[open] summary{color:var(--com_pendencia);font-weight:600}
 .parcial-campos{display:grid;gap:10px;margin-top:6px}
 @media(min-width:720px){.parcial-campos{grid-template-columns:1fr 2fr}}
+
+/* Divergência de quantidade e fotos do talão */
+.diverge{margin:0 8px 10px 44px}
+.diverge summary{cursor:pointer;color:var(--suave);font-size:.92rem;padding:4px 0}
+.diverge[open] summary{color:#92400e;font-weight:600}
+.foto-tit{margin:18px 0 4px}
+.fotos{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.fotos img{display:block;width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--linha)}
+.foto-item form{margin-top:4px}
+.erro[role=alert]{margin:10px 0}

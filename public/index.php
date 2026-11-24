@@ -9,6 +9,8 @@ $pend = (int)q('SELECT COUNT(*) FROM pendencias WHERE resolvida = 0')->fetchColu
 $prox = q("SELECT MIN(data_entrega) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega <> ?", [A_COMBINAR])->fetchColumn();
 $comb = (int)q("SELECT COUNT(*) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega = ?", [A_COMBINAR])->fetchColumn();
 $atras = (int)q("SELECT COUNT(*) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega < ?", [$hoje])->fetchColumn();
+divergencia_garante();
+$div = (int)q('SELECT COUNT(*) FROM divergencias WHERE resolvida = 0')->fetchColumn();
 $p = $u['perfil'];
 // o administrador vê tudo; os demais veem só o que compete ao seu perfil
 $ve = fn(array $perfis) => $p === 'admin' || in_array($p, $perfis, true);
@@ -31,6 +33,7 @@ $al($ve(['deposito']), $n('aguardando'), 'pedido aguardando separação', 'pedid
 $al($ve(['rota']), $n('separado'), 'pedido separado, pronto para a rota', 'pedidos separados, prontos para a rota', 'rota.php', 'separado');
 $al($ve(['rota']), $n('em_rota'), 'pedido em rota para conferir', 'pedidos em rota para conferir', 'rota.php', 'em_rota');
 $al($ve(['rota', 'balcao']), $pend, 'item pendente de entrega', 'itens pendentes de entrega', 'pendencias.php', 'com_pendencia');
+$al($ve(['balcao']), $div, 'item com quantidade divergente para verificar', 'itens com quantidade divergente para verificar', 'divergencias.php', 'com_pendencia');
 $al($ve(['balcao']), $comb, 'pedido com data a combinar', 'pedidos com data a combinar', 'pedidos.php?status=a_combinar', 'cancelado');
 $al($ve(['rota', 'balcao']), $hojeAberto, 'entrega de hoje ainda não concluída', 'entregas de hoje ainda não concluídas', 'pedidos.php?prio=hoje', 'aguardando');
 ?>

@@ -71,3 +71,6 @@ CREATE TABLE pendencias (
   FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id) REFERENCES itens_pedido(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Criadas sozinhas pelo sistema na primeira vez que forem usadas (nao precisa importar):
+-- divergencias (quantidade cadastrada x informada na entrega) e fotos_pedido (foto do talao assinado, arquivos em inc/fotos/).

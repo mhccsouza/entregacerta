@@ -5,13 +5,15 @@ $id = (int)($_GET['id'] ?? 0);
 $p = q('SELECT p.*, c.nome, c.telefone, c.endereco, c.bairro, c.referencia, r.nome AS rota_nome, r.data_rota, uc.nome AS cadastrado_por
         FROM pedidos p JOIN clientes c ON c.id = p.cliente_id LEFT JOIN rotas r ON r.id = p.rota_id LEFT JOIN usuarios uc ON uc.id = p.criado_por WHERE p.id = ?', [$id])->fetch();
 if (!$p) { $u = topo('Pedido não encontrado'); echo '<div class="vazio"><p>Esse pedido não existe ou foi excluído.</p><a class="btn" href="pedidos.php">Ver pedidos</a></div>'; rodape(); exit; }
-pendencia_qtd_garante();
+pendencia_qtd_garante(); divergencia_garante(); fotos_garante();
 $u = topo('Pedido #' . $p['id'], [], '2ª via para consulta e impressão');
 $voltar = ($_GET['de'] ?? '') === 'hist' ? ['historico.php', '‹ Voltar ao histórico'] : ['pedidos.php', '‹ Voltar aos pedidos'];
 $its = q('SELECT * FROM itens_pedido WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll();
 $pend = q('SELECT * FROM pendencias WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll();
 $itById = []; foreach ($its as $i0) { $itById[$i0['id']] = $i0; }
 $pendItem = []; foreach ($pend as $x) { if (!$x['resolvida']) { $pendItem[$x['item_id']] = $x; } }
+$divs = q('SELECT d.*, i.unidade, i.descricao FROM divergencias d JOIN itens_pedido i ON i.id = d.item_id WHERE d.pedido_id = ? ORDER BY d.id', [$id])->fetchAll();
+$fotos = in_array($u['perfil'], ['admin','balcao','rota'], true) ? q('SELECT id FROM fotos_pedido WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll(PDO::FETCH_COLUMN) : [];
 $dt = fn($x) => $x ? date('d/m/Y H:i', strtotime($x)) : '';
 ?>
 <style>@media print{.cabeca{display:none}}</style>
@@ -33,6 +35,9 @@ $dt = fn($x) => $x ? date('d/m/Y H:i', strtotime($x)) : '';
 <td class="c"><?= !empty($pendItem[$i['id']]) ? '<span class="tag s-com_pendencia">Pendente' . ($pendItem[$i['id']]['qtd_falta'] !== null ? ' · falta ' . qtd_fmt($pendItem[$i['id']]['qtd_falta']) . ' ' . h($i['unidade']) : '') . '</span>' : ($i['conferido'] ? 'Entregue' : ($i['separado'] ? 'Separado' : '–')) ?></td></tr><?php endforeach; ?>
 <?php if (!$its): ?><tr><td colspan="3">Sem itens.</td></tr><?php endif; ?></tbody></table>
 <?php if ($pend): ?><h3>Pendências</h3><ul class="via-pend"><?php foreach ($pend as $x): ?><li><?= $x['resolvida'] ? '✔ Resolvida' : '● Em aberto' ?><?php if (!empty($itById[$x['item_id']])): $it = $itById[$x['item_id']]; ?> – <?= $x['qtd_falta'] !== null ? 'falta ' . qtd_fmt($x['qtd_falta']) . ' ' . h($it['unidade']) . ' de ' . qtd_fmt($it['quantidade']) : 'falta ' . qtd_fmt($it['quantidade']) . ' ' . h($it['unidade']) ?> (<?= h($it['descricao']) ?>)<?php endif; ?><?= $x['observacao'] ? ' – ' . h($x['observacao']) : '' ?></li><?php endforeach; ?></ul><?php endif; ?>
+<?php if ($divs): ?><h3>Divergências de quantidade</h3><ul class="via-pend"><?php foreach ($divs as $x): ?><li><?= $x['resolvida'] ? '✔ ' . ($x['resolucao'] === 'corrigido' ? 'Pedido corrigido' : 'Mantido') : '● Para verificar' ?> – <?= h($x['descricao']) ?>: cadastrado <?= qtd_fmt($x['qtd_pedido']) ?> <?= h($x['unidade']) ?>, informado <?= qtd_fmt($x['qtd_real']) ?> <?= h($x['unidade']) ?><?= $x['observacao'] ? ' – ' . h($x['observacao']) : '' ?></li><?php endforeach; ?></ul><?php endif; ?>
+<?php if ($fotos): ?><div class="no-print"><h3>Fotos do talão</h3><div class="fotos"><?php foreach ($fotos as $fid): ?><div class="foto-item"><a href="foto.php?id=<?= (int)$fid ?>" target="_blank" rel="noopener"><img src="foto.php?id=<?= (int)$fid ?>" alt="Foto do talão" loading="lazy"></a>
+<?php if ($u['perfil'] === 'admin'): ?><form method="post" action="foto.php" onsubmit="return confirm('Remover esta foto?')"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= (int)$fid ?>"><button class="peq sec">Remover</button></form><?php endif; ?></div><?php endforeach; ?></div></div><?php endif; ?>
 <?php if ($p['observacao']): ?><h3>Observação</h3><p><?= h($p['observacao']) ?></p><?php endif; ?>
 <p class="via-rodape">2ª via emitida em <?= date('d/m/Y H:i') ?> por <?= h($u['nome']) ?>.</p>
 </article>

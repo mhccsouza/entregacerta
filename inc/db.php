@@ -59,6 +59,64 @@ function pendencia_qtd_garante(): void {
     catch (Throwable $e) { db()->exec('ALTER TABLE pendencias ADD COLUMN qtd_falta DECIMAL(10,2) NULL'); }
 }
 
+
+// Divergencias de quantidade e fotos do talao: as tabelas sao criadas sozinhas na primeira vez.
+function divergencia_garante(): void {
+    static $ok = false;
+    if ($ok) { return; }
+    $ok = true;
+    try { q('SELECT 1 FROM divergencias LIMIT 1'); }
+    catch (Throwable $e) {
+        $sqlite = strpos(DB_DSN, 'sqlite') === 0;
+        db()->exec($sqlite
+            ? 'CREATE TABLE IF NOT EXISTS divergencias (id INTEGER PRIMARY KEY AUTOINCREMENT, pedido_id INTEGER NOT NULL, item_id INTEGER NOT NULL, qtd_pedido REAL NOT NULL, qtd_real REAL NOT NULL, observacao TEXT, resolvida INTEGER NOT NULL DEFAULT 0, resolucao TEXT, criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em TEXT)'
+            : 'CREATE TABLE IF NOT EXISTS divergencias (id INT AUTO_INCREMENT PRIMARY KEY, pedido_id INT NOT NULL, item_id INT NOT NULL, qtd_pedido DECIMAL(10,2) NOT NULL, qtd_real DECIMAL(10,2) NOT NULL, observacao VARCHAR(255) NULL, resolvida TINYINT(1) NOT NULL DEFAULT 0, resolucao VARCHAR(20) NULL, criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em DATETIME NULL, INDEX (pedido_id), INDEX (resolvida)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    }
+}
+function fotos_garante(): void {
+    static $ok = false;
+    if ($ok) { return; }
+    $ok = true;
+    try { q('SELECT 1 FROM fotos_pedido LIMIT 1'); }
+    catch (Throwable $e) {
+        $sqlite = strpos(DB_DSN, 'sqlite') === 0;
+        db()->exec($sqlite
+            ? 'CREATE TABLE IF NOT EXISTS fotos_pedido (id INTEGER PRIMARY KEY AUTOINCREMENT, pedido_id INTEGER NOT NULL, arquivo TEXT NOT NULL, enviada_por INTEGER, criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+            : 'CREATE TABLE IF NOT EXISTS fotos_pedido (id INT AUTO_INCREMENT PRIMARY KEY, pedido_id INT NOT NULL, arquivo VARCHAR(60) NOT NULL, enviada_por INT NULL, criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, INDEX (pedido_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    }
+}
+// Guarda uma foto enviada (JPG/PNG/WEBP) em inc/fotos/ (pasta bloqueada ao acesso direto), reduzida a 1600 px e sem dados de localizacao.
+// Retorna null se deu certo (ou nao veio arquivo) ou a mensagem de erro.
+function foto_salvar(int $pedido, array $f, ?int $uid): ?string {
+    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) { return null; }
+    if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] > 15 * 1024 * 1024) { return 'a foto é grande demais ou não chegou inteira.'; }
+    fotos_garante();
+    if ((int)q('SELECT COUNT(*) FROM fotos_pedido WHERE pedido_id = ?', [$pedido])->fetchColumn() >= 6) { return 'este pedido já tem 6 fotos (o máximo).'; }
+    $info = @getimagesize($f['tmp_name']);
+    $tipos = [IMAGETYPE_JPEG => 'imagecreatefromjpeg', IMAGETYPE_PNG => 'imagecreatefrompng', IMAGETYPE_WEBP => 'imagecreatefromwebp'];
+    if (!$info || !isset($tipos[$info[2]])) { return 'use uma imagem JPG, PNG ou WEBP.'; }
+    $dir = INC . '/fotos';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) { return 'não foi possível criar a pasta das fotos no servidor.'; }
+    $nome = bin2hex(random_bytes(12)) . '.jpg';
+    $fn = $tipos[$info[2]];
+    if (function_exists($fn) && function_exists('imagejpeg')) {
+        $im = @$fn($f['tmp_name']);
+        if (!$im) { return 'não foi possível ler a imagem.'; }
+        if ($info[2] === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+            $ex = @exif_read_data($f['tmp_name']); $o = (int)($ex['Orientation'] ?? 1);
+            $ang = [3 => 180, 6 => -90, 8 => 90][$o] ?? 0;
+            if ($ang) { $r = imagerotate($im, $ang, 0); if ($r) { $im = $r; } }
+        }
+        $w = imagesx($im); $hh = imagesy($im); $m = max($w, $hh);
+        if ($m > 1600) { $im2 = imagescale($im, (int)round($w * 1600 / $m), (int)round($hh * 1600 / $m)); if ($im2) { $im = $im2; } }
+        if (!imagejpeg($im, "$dir/$nome", 82)) { return 'não foi possível gravar a foto.'; }
+    } elseif ($info[2] === IMAGETYPE_JPEG) {
+        if (!move_uploaded_file($f['tmp_name'], "$dir/$nome") && !@copy($f['tmp_name'], "$dir/$nome")) { return 'não foi possível gravar a foto.'; }
+    } else { return 'o servidor não consegue tratar esse formato; use JPG.'; }
+    q('INSERT INTO fotos_pedido (pedido_id, arquivo, enviada_por) VALUES (?,?,?)', [$pedido, $nome, $uid]);
+    return null;
+}
+
 // Vendedores: a tabela e criada sozinha na primeira vez (nao precisa mexer no banco).
 function vendedores(): array {
     static $lista = null;
