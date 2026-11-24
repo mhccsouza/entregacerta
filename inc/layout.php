@@ -10,6 +10,7 @@ function topo(string $titulo, array $perfis = [], string $sub = ''): array {
         'separacao.php' => ['Separação', ['admin','deposito']],
         'rota.php' => ['Rota do dia', ['admin','rota']],
         'pendencias.php' => ['Pendências', ['admin','rota','balcao']],
+        'vendedores.php' => ['Vendedores', ['admin']],
         'usuarios.php' => ['Usuários', ['admin']],
     ];
     $perfil_nome = ['admin'=>'Administrador','balcao'=>'Atendimento','deposito'=>'Depósito','rota'=>'Rotas'];

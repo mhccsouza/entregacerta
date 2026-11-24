@@ -265,3 +265,18 @@ details.mais summary{cursor:pointer;color:var(--verde);font-size:.88rem;padding:
 a.pg:hover{background:var(--verde-cl);border-color:var(--verde)}
 .pg.on{background:var(--verde);border-color:var(--verde);color:#fff}
 .pg-gap{color:var(--suave)}
+
+/* ---------- Pedidos: cartões compactos lado a lado ---------- */
+.cards.compactos{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;align-items:start}
+.cards.compactos .grupo-tit{grid-column:1/-1;margin:14px 0 0}
+.cards.compactos .card{margin:0;padding:12px 14px}
+.cards.compactos .ped-nome{margin:6px 0 0;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cards.compactos .meta{margin:2px 0}
+.resumo-it{margin:6px 0 0;padding:6px 8px;background:#f3f6f1;border-radius:6px;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mais-n{display:inline-block;background:var(--verde);color:#fff;border-radius:999px;padding:0 7px;font-size:.75rem;font-weight:700;margin-left:4px}
+details.mais>summary{margin-top:8px;color:var(--verde);font-weight:600;font-size:.88rem;cursor:pointer;padding:4px 0}
+.cards.compactos .pedido-cab{flex-wrap:nowrap}
+.cards.compactos .tag{font-size:.72rem;padding:2px 8px}
+@media(max-width:759px){.cards.compactos .card{padding:12px}}
+a.chip{display:inline-flex;align-items:center;text-decoration:none}
+.card>h2{margin-top:0}

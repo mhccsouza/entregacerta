@@ -48,3 +48,24 @@ function data_padrao(string $condicao): string {
     $d = q("SELECT MIN(data_entrega) FROM pedidos WHERE data_entrega <> ? AND ($condicao)", [A_COMBINAR])->fetchColumn();
     return $d ?: date('Y-m-d');
 }
+
+// Vendedores: a tabela e criada sozinha na primeira vez (nao precisa mexer no banco).
+function vendedores(): array {
+    static $lista = null;
+    if ($lista !== null) { return $lista; }
+    try { $lista = q('SELECT id, nome FROM vendedores ORDER BY nome')->fetchAll(); }
+    catch (Throwable $e) {
+        $sqlite = strpos(DB_DSN, 'sqlite') === 0;
+        db()->exec($sqlite
+            ? 'CREATE TABLE IF NOT EXISTS vendedores (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL UNIQUE)'
+            : 'CREATE TABLE IF NOT EXISTS vendedores (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(60) NOT NULL UNIQUE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+        $lista = [];
+    }
+    if (!$lista && !(int)q('SELECT COUNT(*) FROM vendedores')->fetchColumn()) {
+        // primeira vez: cadastra os vendedores que ja aparecem nos pedidos (ou Ione e Bruno)
+        $nomes = q("SELECT DISTINCT vendedor FROM pedidos WHERE vendedor <> '' ORDER BY vendedor")->fetchAll(PDO::FETCH_COLUMN) ?: ['Ione', 'Bruno'];
+        foreach ($nomes as $n) { q('INSERT INTO vendedores (nome) VALUES (?)', [$n]); }
+        $lista = q('SELECT id, nome FROM vendedores ORDER BY nome')->fetchAll();
+    }
+    return $lista;
+}

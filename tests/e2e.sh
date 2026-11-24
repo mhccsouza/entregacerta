@@ -89,3 +89,18 @@ echo "aparece em 'a combinar':"; curl -s -b /tmp/c1 "$B/pedidos.php?status=a_com
 echo "painel conta a combinar:"; curl -s -b /tmp/c3 $B/index.php | grep -o '<strong class="num">[0-9]*</strong><span>Data a combinar' | sed 's/<[^>]*>/ /g'
 echo "separacao/rota nao quebram:"; curl -s -b /tmp/c2 -o /dev/null -w "%{http_code} " $B/separacao.php; curl -s -b /tmp/c3 -o /dev/null -w "%{http_code}\n" $B/rota.php
 echo "busca:"; curl -s -b /tmp/c1 "$B/pedidos.php?busca=Prazo+Aberto" | grep -c 'Cliente Prazo Aberto'
+echo "-- VENDEDORES (admin) e filtro:"
+echo "balcao nao acessa (403):"; curl -s -b /tmp/c1 -o /dev/null -w "%{http_code}\n" $B/vendedores.php
+echo "lista inicial (Ione, Bruno semeados):"; curl -s -b /tmp/ad $B/vendedores.php | grep -o '<strong>[A-Za-z]*</strong><span class="tag">[0-9]* pedido' | sed 's/<[^>]*>/ /g'
+T=$(curl -s -b /tmp/ad $B/vendedores.php | tok)
+curl -s -b /tmp/ad --data-urlencode "csrf=$T" --data-urlencode "acao=novo" --data-urlencode "nome=Carla" $B/vendedores.php | grep -o 'Vendedor Carla cadastrado'
+curl -s -b /tmp/ad --data-urlencode "csrf=$T" --data-urlencode "acao=novo" --data-urlencode "nome=carla" $B/vendedores.php | grep -o 'Já existe um vendedor'
+echo "novo pedido lista Carla no select:"; curl -s -b /tmp/c1 $B/pedido_novo.php | grep -o '<option value="Carla"' 
+VID=$(php tests/sql.php -q "select id as m from vendedores where nome='Bruno'")
+curl -s -b /tmp/ad --data-urlencode "csrf=$T" --data-urlencode "acao=editar" --data-urlencode "id=$VID" --data-urlencode "nome=Bruno Silva" $B/vendedores.php | grep -o 'Nome alterado de [^<]*'
+php tests/sql.php -q "select 'pedidos com Bruno Silva: '||count(*) as s from pedidos where vendedor='Bruno Silva'"
+echo "filtro por vendedor:"; curl -s -b /tmp/ad "$B/pedidos.php?vendedor=Bruno+Silva" | grep -o '[0-9]* pedidos\? de Bruno Silva' | head -1
+echo "filtro por periodo (de/ate):"; curl -s -b /tmp/ad "$B/pedidos.php?de=$(date +%F)&ate=$(date -d '+1 day' +%F)" | grep -o '<span class="nota" style="margin:0">[^<]*' | sed 's/<[^>]*>//'
+echo "balcao nao exclui vendedor (403):"; curl -s -b /tmp/c1 -o /dev/null -w "%{http_code}\n" -d "csrf=x&acao=excluir&id=$VID" $B/vendedores.php
+curl -s -b /tmp/ad --data-urlencode "csrf=$T" --data-urlencode "acao=excluir" --data-urlencode "id=$VID" $B/vendedores.php | grep -o 'Vendedor Bruno Silva removido'
+php tests/sql.php -q "select 'pedidos antigos mantem o nome: '||count(*) as s from pedidos where vendedor='Bruno Silva'"

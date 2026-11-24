@@ -84,8 +84,10 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <label class="marcar" for="a_combinar"><input type="checkbox" id="a_combinar" name="a_combinar" value="1" <?= $comb ? 'checked' : '' ?>> A combinar com o cliente</label>
 <p class="nota" id="nota-combinar" <?= $comb ? '' : 'hidden' ?>>O pedido fica na lista sem data. Quando o cliente definir o prazo, edite o pedido e escolha a data.</p>
 <div class="chips" id="atalhos-data" <?= $comb ? 'hidden' : '' ?>><button type="button" class="chip" data-d="0">Hoje</button><button type="button" class="chip" data-d="1">Amanhã</button><button type="button" class="chip" data-d="2">Depois de amanhã</button></div></div>
-<div><label class="req" for="vendedor">Vendedor</label><input id="vendedor" name="vendedor" value="<?= h($v['vendedor']) ?>" autocomplete="off" required>
-<div class="chips" id="atalhos-vend"><button type="button" class="chip">Ione</button><button type="button" class="chip">Bruno</button></div></div>
+<div><label class="req" for="vendedor">Vendedor</label><select id="vendedor" name="vendedor" required><option value="">Escolha o vendedor</option>
+<?php $nomesV = array_column(vendedores(), 'nome'); if ($v['vendedor'] !== '' && !in_array($v['vendedor'], $nomesV, true)) { $nomesV[] = $v['vendedor']; } foreach ($nomesV as $nv): ?><option value="<?= h($nv) ?>" <?= $v['vendedor'] === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select>
+<?php if (!$nomesV): ?><p class="nota">Nenhum vendedor cadastrado. O administrador cadastra em Vendedores.</p><?php endif; ?>
+</div>
 </div>
 <label for="observacao">Observação</label><input id="observacao" name="observacao" value="<?= h($v['observacao']) ?>" placeholder="Horário combinado, restrição de acesso…" autocomplete="off"></div>
 
@@ -126,11 +128,6 @@ dt.addEventListener('input',marcaData);marcaData();
 var ac=document.getElementById('a_combinar');
 function combinar(){dt.disabled=ac.checked;dt.required=!ac.checked;document.getElementById('atalhos-data').hidden=ac.checked;document.getElementById('nota-combinar').hidden=!ac.checked;dt.classList.remove('campo-erro')}
 ac.addEventListener('change',combinar);combinar();
-// vendedor
-var vd=document.getElementById('vendedor');
-function marcaVend(){document.querySelectorAll('#atalhos-vend .chip').forEach(function(c){c.classList.toggle('on',vd.value.trim().toLowerCase()===c.textContent.toLowerCase())})}
-document.getElementById('atalhos-vend').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c){vd.value=c.textContent;marcaVend()}});
-vd.addEventListener('input',marcaVend);marcaVend();
 // validação amigável: foca no primeiro campo faltando
 document.getElementById('form-pedido').addEventListener('submit',function(e){
  var f=['nome','endereco','vendedor'].concat(ac.checked?[]:['data_entrega']).map(function(i){return document.getElementById(i)});
