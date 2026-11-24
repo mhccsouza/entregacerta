@@ -49,6 +49,16 @@ function data_padrao(string $condicao): string {
     return $d ?: date('Y-m-d');
 }
 
+// Pendencias parciais: a coluna qtd_falta e criada sozinha na primeira vez (nao precisa mexer no banco).
+// Valor NULL = faltou o item inteiro (comportamento antigo).
+function pendencia_qtd_garante(): void {
+    static $ok = false;
+    if ($ok) { return; }
+    $ok = true;
+    try { q('SELECT qtd_falta FROM pendencias LIMIT 1'); }
+    catch (Throwable $e) { db()->exec('ALTER TABLE pendencias ADD COLUMN qtd_falta DECIMAL(10,2) NULL'); }
+}
+
 // Vendedores: a tabela e criada sozinha na primeira vez (nao precisa mexer no banco).
 function vendedores(): array {
     static $lista = null;

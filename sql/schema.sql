@@ -65,6 +65,7 @@ CREATE TABLE pendencias (
   pedido_id INT NOT NULL,
   item_id INT NOT NULL,
   observacao VARCHAR(255) NULL,
+  qtd_falta DECIMAL(10,2) NULL, -- quanto faltou entregar (NULL = item inteiro)
   resolvida TINYINT(1) NOT NULL DEFAULT 0,
   criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
