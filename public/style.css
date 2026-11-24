@@ -378,11 +378,12 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 /* ---------- Campos de data: texto centralizado e sem "data fantasma" no Safari ---------- */
 input[type=date]{
   -webkit-appearance:none;appearance:none;display:block;
-  line-height:calc(var(--campo-h) - 2px);padding:0 10px 0 12px;text-align:left;
+  height:auto;min-height:var(--campo-h);box-sizing:border-box;
+  padding:12px 10px 12px 12px;line-height:20px;text-align:left;
 }
-input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:0;line-height:inherit}
-input[type=date]::-webkit-datetime-edit{padding:0;line-height:inherit}
-input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0;line-height:inherit}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:20px;line-height:20px;display:block}
+input[type=date]::-webkit-datetime-edit{padding:0;line-height:20px}
+input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}
 input[type=date]::-webkit-inner-spin-button{display:none}
 .data-w{position:relative}
 .data-w .ph{display:none}
