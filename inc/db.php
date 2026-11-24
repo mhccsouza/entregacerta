@@ -23,3 +23,9 @@ function qtd_fmt($n): string { $n = (float)$n; return rtrim(rtrim(number_format(
 function status_nome(string $s): string {
     return ['aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','entregue'=>'Entregue','com_pendencia'=>'Com pendência'][$s] ?? $s;
 }
+
+// Data padrão das telas: a mais antiga com pedido pendente (ou hoje, se não houver).
+function data_padrao(string $condicao): string {
+    $d = q("SELECT MIN(data_entrega) FROM pedidos WHERE $condicao")->fetchColumn();
+    return $d ?: date('Y-m-d');
+}
