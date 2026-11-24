@@ -9,7 +9,7 @@ $ps = $rotaId ? q($sql . 'p.rota_id = ? ORDER BY p.ordem_rota, p.id', [$rotaId])
 $itens = [];
 if ($ps) { foreach (q('SELECT * FROM itens_pedido WHERE pedido_id IN (' . implode(',', array_map(fn($p) => (int)$p['id'], $ps)) . ') ORDER BY id')->fetchAll() as $i) { $itens[$i['pedido_id']][] = $i; } }
 $pap = ($_GET['pap'] ?? 'A4') === 'A5' ? 'A5' : 'A4';
-$volta = $rotaId && $ps ? 'rota.php?data=' . $ps[0]['data_entrega'] : ($ps ? 'entrega.php?id=' . (int)$ps[0]['id'] : 'rota.php');
+$volta = $rotaId && $ps ? 'rota.php?data=' . $ps[0]['data_entrega'] : ($ps ? (in_array($u['perfil'], ['admin', 'rota'], true) ? 'entrega.php?id=' . (int)$ps[0]['id'] : 'pedidos.php') : 'rota.php');
 ?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Comprovante de entrega</title>
 <style>
 @page{size:<?= $pap === 'A5' ? 'A5' : 'A4' ?>;margin:<?= $pap === 'A5' ? '8mm' : '14mm' ?>}

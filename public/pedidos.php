@@ -101,7 +101,7 @@ $q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $s
 <?php if ($p['observacao']): ?><p class="meta">Obs.: <?= h($p['observacao']) ?></p><?php endif; ?>
 <?php $elegivel = $p['status'] === 'aguardando' && empty($sepCont[$p['id']]);
 $pode_ed = in_array($u['perfil'], ['admin','balcao'], true) && $elegivel;
-$pode_conf = in_array($p['status'], ['em_rota','com_pendencia'], true);
+$pode_conf = in_array($p['status'], ['em_rota','com_pendencia'], true) && in_array($u['perfil'], ['admin','rota'], true);
 $pode_canc = $u['perfil'] === 'admin' && in_array($p['status'], ['aguardando','separado','em_rota'], true);
 $pode_exc_adm = $u['perfil'] === 'admin' && !$elegivel; ?>
 <div class="acoes-card no-print"><a class="btn sec peq" href="pedido_ver.php?id=<?= $p['id'] ?>">Ver / 2ª via</a>
