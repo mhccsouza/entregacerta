@@ -70,7 +70,7 @@ $entrega = '<b>Entrega: ' . data_br($p['data_entrega']) . '</b>' . ($pz && $p['d
 <?php endforeach; ?></div>
 <?php endforeach; ?>
 <div class="sep-fundo no-print" id="sep-fundo"></div>
-<div class="barra barra-fixa no-print"><button>Salvar separação</button><button type="button" class="sec" onclick="window.print()">Imprimir lista</button><span class="nao-salvo" id="nao-salvo" hidden>Há marcações ainda não salvas</span></div></form>
+<div class="barra barra-fixa no-print"><button>Salvar separação</button><a class="btn sec" href="separacao_imprimir.php?ver=<?= h($_GET['ver'] ?? 'todos') ?>" target="_blank" rel="noopener">Imprimir cupons (bobina)</a><span class="nao-salvo" id="nao-salvo" hidden>Há marcações ainda não salvas</span></div></form>
 <script>
 (function(){
  var fundo=document.getElementById('sep-fundo'),aviso=document.getElementById('nao-salvo'),aberto=null;

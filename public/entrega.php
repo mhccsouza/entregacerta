@@ -28,7 +28,7 @@ $itens = q('SELECT * FROM itens_pedido WHERE pedido_id = ?', [$id])->fetchAll();
 <div class="checklist"><?php foreach ($itens as $i): ?><div class="check <?= $i['conferido'] ? 'feito' : '' ?>"><input type="checkbox" name="ok[]" value="<?= $i['id'] ?>" id="i<?= $i['id'] ?>" <?= $i['conferido']?'checked':'' ?>>
 <span class="qtd"><?= qtd_fmt($i['quantidade']) ?> <?= h($i['unidade']) ?></span><label for="i<?= $i['id'] ?>" class="txt"><?= h($i['descricao']) ?></label></div><?php endforeach; ?></div>
 <label for="obs">Observação sobre a pendência (opcional)</label><input id="obs" name="obs" placeholder="Ex.: faltou 1 saco, cliente aguarda reposição">
-<div class="barra"><button>Registrar conferência</button><a class="btn sec" href="rota.php?data=<?= h($p['data_entrega']) ?>">Voltar</a></div></form>
+<div class="barra"><button>Registrar conferência</button><a class="btn sec" href="comprovante.php?id=<?= (int)$p['id'] ?>" target="_blank" rel="noopener">Comprovante A4</a><a class="btn sec" href="rota.php?data=<?= h($p['data_entrega']) ?>">Voltar</a></div></form>
 <script>
 (function(){var c=document.querySelector('.sep'),cks=c.querySelectorAll('input[type=checkbox]'),bar=c.querySelector('.progresso i'),tx=c.querySelector('.prog-txt');
 function at(){var n=0;cks.forEach(function(k){if(k.checked)n++;k.closest('.check').classList.toggle('feito',k.checked)});bar.style.width=(100*n/cks.length)+'%';tx.textContent=n+' de '+cks.length+' itens conferidos'}

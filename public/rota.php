@@ -39,7 +39,7 @@ $rotas = q('SELECT * FROM rotas WHERE data_rota = ? ORDER BY id', [$data])->fetc
 <div class="card"><div class="pedido-cab"><strong><?= (int)$p['ordem_rota'] ?>. <?= h($p['nome']) ?></strong> <?= stag($p['status']) ?></div>
 <p class="meta"><?= h($p['endereco']) ?> – <?= h($p['bairro']) ?><?= $p['referencia'] ? '<br>Ref.: ' . h($p['referencia']) : '' ?><?= $p['telefone'] ? '<br>Tel.: ' . h($p['telefone']) : '' ?><?= $p['observacao'] ? '<br>Obs.: ' . h($p['observacao']) : '' ?></p>
 <table class="itens"><?php foreach (q('SELECT * FROM itens_pedido WHERE pedido_id = ?', [$p['id']])->fetchAll() as $i): ?><tr><td>☐ <?= qtd_fmt($i['quantidade']) ?> <?= h($i['unidade']) ?></td><td><?= h($i['descricao']) ?></td></tr><?php endforeach; ?></table>
-<div class="acoes-card no-print"><a class="btn peq" href="entrega.php?id=<?= $p['id'] ?>">Conferir entrega</a></div></div>
+<div class="acoes-card no-print"><a class="btn peq" href="entrega.php?id=<?= $p['id'] ?>">Conferir entrega</a> <a class="btn peq sec" href="comprovante.php?id=<?= $p['id'] ?>" target="_blank" rel="noopener">Comprovante A4</a></div></div>
 <?php endforeach; ?></div><?php endforeach; ?>
 <script>document.querySelectorAll('.sel-card input[type=checkbox]').forEach(function(c){function a(){c.closest('.sel-card').classList.toggle('marcado',c.checked)}c.addEventListener('change',a);a()});</script>
-<?php if ($rotas): ?><div class="barra no-print"><button type="button" class="sec" onclick="window.print()">Imprimir rota</button></div><?php endif; rodape();
+<?php if ($rotas): ?><div class="barra no-print"><button type="button" class="sec" onclick="window.print()">Imprimir rota</button> <?php foreach ($rotas as $r0): ?><a class="btn sec" href="comprovante.php?rota=<?= (int)$r0['id'] ?>" target="_blank" rel="noopener">Carregamento + comprovantes: <?= h($r0['nome']) ?></a> <?php endforeach; ?></div><?php endif; rodape();
