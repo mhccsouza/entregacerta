@@ -2,7 +2,7 @@
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
 require_once INC . '/auth.php';
 $u = exige_login([]);                       // admin passa sempre; os demais perfis caem abaixo
-if ($u['perfil'] !== 'admin') { http_response_code(403); exit('Somente o administrador cancela pedidos.'); }
+if ($u['perfil'] !== 'admin') { acesso_negado($u); }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: pedidos.php'); exit; }
 csrf_ok();
 $id = (int)($_POST['id'] ?? 0);

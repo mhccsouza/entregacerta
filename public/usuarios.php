@@ -1,8 +1,8 @@
 <?php
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
 require_once INC . '/layout.php';
+$u0 = exige_login([]); if ($u0['perfil'] !== 'admin') { acesso_negado($u0); }
 $u = topo('Usuários e senhas', [], 'Troque a senha de qualquer usuário. Use ao menos 8 caracteres.');
-if ($u['perfil'] !== 'admin') { http_response_code(403); echo '<p class="erro">Somente o administrador acessa esta tela.</p>'; rodape(); exit; }
 $msg = ''; $erro = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok();

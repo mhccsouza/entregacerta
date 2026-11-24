@@ -49,7 +49,7 @@ th{background:#eef2ec;font-size:12px}
 <?php if (!$ps): ?><div class="vazio"><p>Pedido ou rota não encontrado.</p></div><?php endif; ?>
 <?php if ($rotaId && $ps): $rv = array_reverse($ps); $totalIt = 0; foreach ($ps as $x) { $totalIt += count($itens[$x['id']] ?? []); } ?>
 <section class="pag" id="carga">
-<div class="cab"><div><h1>Carregamento do veículo</h1><span class="loja"><?= h(NOME_LOJA) ?> · <?= h(NOME_SISTEMA) ?></span></div><div class="num"><?= h($ps[0]['rota_nome'] ?? 'Rota') ?><small>Data: <?= data_br($ps[0]['data_entrega']) ?> · <?= count($ps) ?> entregas · <?= $totalIt ?> itens</small></div></div>
+<div class="cab"><div><h1>Carregamento do veículo</h1><span class="loja"><?= h(NOME_LOJA) ?> · <?= h(NOME_SISTEMA) ?></span></div><div class="num"><?= h($ps[0]['rota_nome'] ?? 'Rota') ?><small>Data: <?= data_br($ps[0]['data_entrega']) ?> · <?= count($ps) ?> <?= count($ps) === 1 ? 'entrega' : 'entregas' ?> · <?= $totalIt ?> <?= $totalIt === 1 ? 'item' : 'itens' ?></small></div></div>
 <p class="decl">Carregue na ordem abaixo: a última entrega da rota entra primeiro, para a primeira ficar mais perto da porta.</p>
 <?php foreach ($rv as $x): ?>
 <div class="stop" data-id="<?= (int)$x['id'] ?>"><h2>Carregar <span class="n"><?= $loop = ($loop ?? 0) + 1 ?></span>º · Entrega <?= (int)$x['ordem_rota'] ?: '—' ?> · Pedido #<?= (int)$x['id'] ?> · <?= h($x['nome']) ?><?= $x['bairro'] ? ' (' . h($x['bairro']) . ')' : '' ?></h2>

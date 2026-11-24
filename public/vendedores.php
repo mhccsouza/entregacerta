@@ -1,8 +1,8 @@
 <?php
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
 require_once INC . '/layout.php';
+$u0 = exige_login([]); if ($u0['perfil'] !== 'admin') { acesso_negado($u0); }
 $u = topo('Vendedores', [], 'Cadastre quem vende. A lista aparece no novo pedido e nos filtros.');
-if ($u['perfil'] !== 'admin') { http_response_code(403); echo '<p class="erro">Somente o administrador acessa esta tela.</p>'; rodape(); exit; }
 $msg = ''; $erro = '';
 vendedores(); // garante a tabela
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
