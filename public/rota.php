@@ -26,13 +26,13 @@ $rotas = q('SELECT * FROM rotas WHERE data_rota = ? ORDER BY id', [$data])->fetc
 <form method="get" class="no-print card"><label for="data" style="margin-top:0">Data</label><input id="data" type="date" name="data" value="<?= h($data) ?>" onchange="this.form.submit()"></form>
 <?php if ($livres): ?><form method="post" class="no-print"><?= csrf_campo() ?><input type="hidden" name="data" value="<?= h($data) ?>">
 <h2>Pedidos sem rota</h2><p class="nota" style="margin:-4px 0 10px">Marque os pedidos desta saída e, se quiser, indique a ordem das paradas (1, 2, 3…).</p>
-<table class="resp rota"><tr><th>Incluir</th><th>Ordem</th><th>Pedido</th><th>Endereço</th><th>Separação</th></tr>
-<?php foreach ($livres as $p): $falta = (int)q('SELECT COUNT(*) FROM itens_pedido WHERE pedido_id = ? AND separado = 0', [$p['id']])->fetchColumn(); ?>
-<tr><td data-label="Incluir na rota" style="width:70px"><input type="checkbox" name="pedido[]" value="<?= $p['id'] ?>" aria-label="Incluir pedido <?= $p['id'] ?>"></td>
-<td data-label="Ordem na rota" style="width:100px"><input name="ordem[<?= $p['id'] ?>]" inputmode="numeric" value="" aria-label="Ordem do pedido <?= $p['id'] ?>"></td>
-<td data-label="Pedido"><strong>#<?= $p['id'] ?></strong> · <?= h($p['nome']) ?></td><td data-label="Endereço"><?= h($p['endereco']) ?> – <?= h($p['bairro']) ?></td>
-<td data-label="Separação"><?= $falta ? '<span class="tag s-aguardando">' . $falta . ' item(ns) por separar</span>' : '<span class="tag s-separado">Separado</span>' ?></td></tr>
-<?php endforeach; ?></table><div class="barra"><button>Montar rota com os pedidos marcados</button></div></form>
+<div class="sel-lista"><?php foreach ($livres as $p): $falta = (int)q('SELECT COUNT(*) FROM itens_pedido WHERE pedido_id = ? AND separado = 0', [$p['id']])->fetchColumn(); ?>
+<div class="sel-card"><input type="checkbox" name="pedido[]" value="<?= $p['id'] ?>" id="p<?= $p['id'] ?>" aria-label="Incluir pedido <?= $p['id'] ?>">
+<label for="p<?= $p['id'] ?>" class="sel-info"><strong>#<?= $p['id'] ?> · <?= h($p['nome']) ?></strong><span><?= h($p['endereco']) ?> – <?= h($p['bairro']) ?></span>
+<?= $falta ? '<span class="tag s-aguardando">' . $falta . ' item(ns) por separar</span>' : '<span class="tag s-separado">Separado</span>' ?></label>
+<div class="sel-ordem"><label for="o<?= $p['id'] ?>">Ordem</label><input id="o<?= $p['id'] ?>" name="ordem[<?= $p['id'] ?>]" inputmode="numeric" maxlength="3" placeholder="1"></div></div>
+<?php endforeach; ?></div>
+<div class="barra"><button>Montar rota com os pedidos marcados</button></div></form>
 <?php else: ?><div class="vazio no-print"><p>Nenhum pedido sem rota nesta data.</p></div><?php endif; ?>
 <?php foreach ($rotas as $r): ?><h2><?= h($r['nome']) ?></h2><div class="cards">
 <?php foreach (q('SELECT p.*, c.nome, c.endereco, c.bairro, c.referencia, c.telefone FROM pedidos p JOIN clientes c ON c.id = p.cliente_id WHERE p.rota_id = ? ORDER BY p.ordem_rota', [$r['id']])->fetchAll() as $p): ?>

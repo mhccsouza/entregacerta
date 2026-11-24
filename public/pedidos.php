@@ -52,9 +52,9 @@ if (!empty($_GET['cancelado'])): ?><p class="ok">Pedido #<?= (int)$_GET['cancela
 if (!empty($_GET['naocancelado'])): ?><p class="erro">Não foi possível cancelar o pedido #<?= (int)$_GET['naocancelado'] ?>. Informe o motivo; só pedidos ainda não entregues podem ser cancelados.</p><?php endif;
 if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['bloqueado'] ?> já foi separado ou entrou em rota e só o administrador pode excluí-lo.</p><?php endif; ?>
 <form method="get" class="no-print card filtros"><div class="grid">
-<div><label for="busca" style="margin-top:0">Buscar</label><input id="busca" type="search" name="busca" value="<?= h($busca) ?>" placeholder="Cliente, endereço, bairro ou nº"></div>
+<div class="f-larga"><label for="busca" style="margin-top:0">Buscar</label><input id="busca" type="search" name="busca" value="<?= h($busca) ?>" placeholder="Cliente, endereço, bairro ou nº"></div>
 <div><label for="vendedor" style="margin-top:0">Vendedor</label><select id="vendedor" name="vendedor" onchange="this.form.submit()"><option value="">Todos</option><?php foreach ($nomesVend as $nv): ?><option value="<?= h($nv) ?>" <?= $vend === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select></div>
-<div><label for="status" style="margin-top:0">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto e próximos</option>
+<div><label for="status" style="margin-top:0">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option>
 <?php foreach (['a_combinar'=>'Data a combinar','aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','com_pendencia'=>'Com pendência','entregue'=>'Entregue','cancelado'=>'Cancelado'] as $k => $n): ?><option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= h($n) ?></option><?php endforeach; ?></select></div>
 <div><label for="de" style="margin-top:0">Entrega de</label><input id="de" type="date" name="de" value="<?= h($de) ?>"></div>
 <div><label for="ate" style="margin-top:0">até</label><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"></div></div>

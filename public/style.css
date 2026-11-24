@@ -280,3 +280,31 @@ details.mais>summary{margin-top:8px;color:var(--verde);font-weight:600;font-size
 @media(max-width:759px){.cards.compactos .card{padding:12px}}
 a.chip{display:inline-flex;align-items:center;text-decoration:none}
 .card>h2{margin-top:0}
+
+/* ---------- Seleção de pedidos para a rota ---------- */
+.sel-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.sel-card{display:grid;grid-template-columns:28px minmax(0,1fr) 76px;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--linha);border-radius:var(--raio);padding:12px;box-shadow:var(--sombra)}
+.sel-card:has(input[type=checkbox]:checked){border-color:var(--verde);background:#f3faf4}
+.sel-info{display:flex;flex-direction:column;gap:3px;margin:0;font-weight:400;cursor:pointer;min-width:0}
+.sel-info strong{font-weight:700}.sel-info span:not(.tag){color:var(--suave);font-size:.9rem}
+.sel-info .tag{align-self:flex-start;margin-top:2px}
+.sel-ordem label{margin:0 0 2px;font-size:.78rem;color:var(--suave);text-align:center}
+.sel-ordem input{text-align:center;padding:8px 4px}
+
+/* ---------- Ajustes de harmonia entre telas ---------- */
+.filtros .f-larga{grid-column:1/-1}
+@media(min-width:900px){.filtros .f-larga{grid-column:auto}}
+@media(max-width:759px){
+  .filtros .grid{grid-template-columns:1fr 1fr;gap:0 10px}
+  .filtros .grid label{font-size:.82rem}
+  .filtros .chips{gap:6px}.filtros .chip{padding:4px 12px;min-height:34px;font-size:.85rem}
+  .filtros .barra button{width:auto}
+}
+@media(max-width:1100px){.nav a{padding:17px 9px;font-size:.9rem}.nav{margin-left:0}.marca small{display:none}}
+@media(max-width:759px){.nav a{padding:12px 11px}}
+/* campos lado a lado em telas médias, um embaixo do outro no celular */
+.grid>div>input,.grid>div>select{margin:0}
+.grid>div{min-width:0}
+.filtros input,.filtros select{min-width:0;max-width:100%}
+@media(min-width:760px){.filtros .grid{grid-template-columns:repeat(4,minmax(0,1fr))}.filtros .f-larga{grid-column:1/-1}}
+@media(min-width:1000px){.filtros .grid{grid-template-columns:1.7fr 1fr 1.2fr 1fr 1fr}.filtros .f-larga{grid-column:auto}}
