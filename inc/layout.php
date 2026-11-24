@@ -9,6 +9,7 @@ function topo(string $titulo, array $perfis = []): array {
         'separacao.php' => ['Separação', ['admin','deposito']],
         'rota.php' => ['Rota do dia', ['admin','rota']],
         'pendencias.php' => ['Pendências', ['admin','rota','balcao']],
+        'usuarios.php' => ['Usuários', ['admin']],
     ];
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
     echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css"></head><body>';

@@ -1,0 +1,25 @@
+<?php
+define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
+require_once INC . '/layout.php';
+$u = topo('Usuários e senhas', []);
+if ($u['perfil'] !== 'admin') { http_response_code(403); echo '<p class="erro">Somente o administrador acessa esta tela.</p>'; rodape(); exit; }
+$msg = ''; $erro = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_ok();
+    $id = (int)($_POST['id'] ?? 0); $s1 = $_POST['senha'] ?? ''; $s2 = $_POST['senha2'] ?? '';
+    if (strlen($s1) < 8) { $erro = 'A senha precisa ter ao menos 8 caracteres.'; }
+    elseif ($s1 !== $s2) { $erro = 'As duas senhas não são iguais.'; }
+    else {
+        $n = q('UPDATE usuarios SET senha_hash = ? WHERE id = ? AND ativo = 1', [password_hash($s1, PASSWORD_DEFAULT), $id])->rowCount();
+        $msg = $n ? 'Senha alterada.' : 'Usuário não encontrado.';
+    }
+}
+if ($msg): ?><p class="ok"><?= h($msg) ?></p><?php endif; if ($erro): ?><p class="erro"><?= h($erro) ?></p><?php endif;
+$perfil_nome = ['admin'=>'Administrador','balcao'=>'Atendimento','deposito'=>'Depósito','rota'=>'Rotas'];
+foreach (q('SELECT id, nome, login, perfil FROM usuarios WHERE ativo = 1 ORDER BY id')->fetchAll() as $r): ?>
+<form method="post" class="card"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+<strong><?= h($r['nome']) ?></strong> · login: <code><?= h($r['login']) ?></code> · <?= h($perfil_nome[$r['perfil']] ?? $r['perfil']) ?>
+<div class="grid"><div><label for="s<?= $r['id'] ?>">Nova senha</label><input id="s<?= $r['id'] ?>" name="senha" type="password" autocomplete="new-password" required></div>
+<div><label for="t<?= $r['id'] ?>">Repita a nova senha</label><input id="t<?= $r['id'] ?>" name="senha2" type="password" autocomplete="new-password" required></div></div>
+<p><button>Trocar senha</button></p></form>
+<?php endforeach; rodape();
