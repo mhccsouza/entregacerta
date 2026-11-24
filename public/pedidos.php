@@ -88,7 +88,8 @@ $q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $s
 <?php foreach ($ps as $p): [$pz, $pzc] = prazo($p['data_entrega'], $p['status']); $its = $itens[$p['id']] ?? [];
 ?>
 <div class="card ped-card <?= $pzc ?: 'p-mais' ?>">
-<div class="pedido-cab"><span class="c-data"><b><?= data_br($p['data_entrega']) ?></b><?= $pz && $p['data_entrega'] !== A_COMBINAR ? ' <em class="prazo ' . $pzc . '">' . h($pz) . '</em>' : '' ?></span><?= stag($p['status']) ?></div>
+<div class="pedido-cab"><span class="c-data"><b><?= data_br($p['data_entrega']) ?></b></span><?= stag($p['status']) ?></div>
+<div class="linha-prazo"><?= $pz && $p['data_entrega'] !== A_COMBINAR ? '<em class="prazo ' . $pzc . '">' . h($pz) . '</em>' : ($p['data_entrega'] === A_COMBINAR ? '<em class="prazo p-combinar">Aguardando definição</em>' : '') ?></div>
 <p class="ped-nome"><strong>#<?= $p['id'] ?> · <?= h($p['nome']) ?></strong></p>
 <p class="meta"><?= h($p['bairro'] ?: 'Sem bairro') ?> · <b><?= h($p['vendedor']) ?></b></p>
 <p class="resumo-it"><?= $its ? qtd_fmt($its[0]['quantidade']) . ' ' . h($its[0]['unidade']) . ' ' . h($its[0]['descricao']) : 'Sem itens' ?><?= count($its) > 1 ? ' <span class="mais-n">+' . (count($its) - 1) . '</span>' : '' ?></p>
