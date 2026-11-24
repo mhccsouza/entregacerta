@@ -65,6 +65,7 @@ $entrega = '<b>Entrega: ' . data_br($p['data_entrega']) . '</b>' . ($pz && $p['d
 <div class="foco-acoes no-print">
 <button type="submit" name="foco" value="<?= $p['id'] ?>">Salvar e voltar à lista</button>
 <button type="button" class="sec todos">Marcar todos</button>
+<a class="btn sec" href="separacao_imprimir.php?ped=<?= (int)$p['id'] ?>" target="_blank" rel="noopener">Imprimir este pedido</a>
 <button type="button" class="sec fechar">Fechar sem salvar</button></div>
 </div></div>
 <?php endforeach; ?></div>
