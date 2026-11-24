@@ -376,11 +376,14 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 @media(max-width:759px){.cards.compactos{grid-template-columns:1fr;grid-auto-rows:auto}}
 
 /* ---------- Campos de data: texto centralizado e sem "data fantasma" no Safari ---------- */
-input[type=date]{line-height:1.2;padding:0 10px 0 12px}
-@supports selector(input::-webkit-datetime-edit){input[type=date]{display:flex;align-items:center}}
-input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:1.3em}
-input[type=date]::-webkit-datetime-edit{padding:0;line-height:1.2}
-input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}
+input[type=date]{
+  -webkit-appearance:none;appearance:none;display:block;
+  line-height:calc(var(--campo-h) - 2px);padding:0 10px 0 12px;text-align:left;
+}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:0;line-height:inherit}
+input[type=date]::-webkit-datetime-edit{padding:0;line-height:inherit}
+input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0;line-height:inherit}
+input[type=date]::-webkit-inner-spin-button{display:none}
 .data-w{position:relative}
 .data-w .ph{display:none}
 @supports selector(input::-webkit-datetime-edit){
