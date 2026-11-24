@@ -16,7 +16,7 @@ $prio = (string)($_GET['prio'] ?? ''); if (!isset($prios[$prio])) { $prio = ''; 
 $d1 = date('Y-m-d', strtotime('+1 day')); $d2 = date('Y-m-d', strtotime('+2 day')); $d7 = date('Y-m-d', strtotime('+7 day'));
 $vend = trim((string)($_GET['vendedor'] ?? ''));
 $busca = trim((string)($_GET['busca'] ?? ''));
-$pag = max(1, (int)($_GET['pag'] ?? 1)); $por = 30;
+$pag = max(1, (int)($_GET['pag'] ?? 1)); $por = 12;
 $w = []; $pr = [];
 if ($de)  { $w[] = 'p.data_entrega >= ?'; $pr[] = $de; }
 if ($ate) { $w[] = 'p.data_entrega <= ?'; $pr[] = $ate; }
