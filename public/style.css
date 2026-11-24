@@ -459,3 +459,27 @@ input,select,textarea,button{font-family:inherit}
 .aba{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;border:2px solid #cbd5c9;border-radius:12px;background:#fff;color:var(--tinta);font-weight:700;text-decoration:none;font-size:1rem}
 .aba b{min-width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#e1e6de;font-size:.85rem;padding:0 8px}
 .aba.on{background:#0f4a24;border-color:#0f4a24;color:#fff}.aba.on b{background:#fff;color:#0f4a24}
+
+/* separação em foco: cartão resumido + janela só com o pedido aberto */
+.sep-resumo{cursor:pointer;border-left:6px solid #cbd5c9}
+.sep-resumo:hover{box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.sep-resumo:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}
+.sep-resumo.completo{border-left-color:#1c7a3c}
+.sep-resumo .abrir{display:block;margin-top:8px;color:var(--verde,#14532d);font-weight:700;font-size:.95rem}
+.sep-resumo.completo .abrir::before{content:"\2713\00a0Completo \00b7\00a0"}
+.sep-foco{display:none}
+.sep-fundo{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(15,30,20,.6);z-index:200}
+.sep-fundo.on{display:block}
+.sep-foco.on{display:block;position:fixed;z-index:210;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,94vw);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.sep-foco h2{margin:0 0 4px;font-size:1.35rem}
+.sep-foco .check{min-height:60px;font-size:1.15rem}
+.sep-foco .checklist{margin-top:10px}
+.foco-acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.foco-acoes button{flex:1 1 180px}
+body.sem-rolagem{overflow:hidden}
+.nao-salvo{color:#9a3412;font-weight:700;font-size:.9rem}
+.nao-salvo[hidden]{display:none}
+@media print{
+  .sep-resumo,.sep-fundo{display:none!important}
+  .sep-foco{display:block!important;position:static!important;transform:none!important;width:auto!important;max-height:none!important;box-shadow:none!important;padding:0 0 10px!important;border:1px solid #000;border-radius:8px;margin:0 0 10px;padding:10px!important;break-inside:avoid}
+}
