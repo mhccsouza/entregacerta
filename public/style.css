@@ -156,7 +156,7 @@ body.login{min-height:100vh;display:grid;grid-template-columns:1fr;background:va
     box-shadow:inset 0 0 0 6px #0f4a24;
   }
   /* piso: peças quadradas com rejunte, como um assentamento em diagonal */
-  .login-lado::before{content:"";position:absolute;inset:0;background:
+  .login-lado::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:
     repeating-linear-gradient(0deg,transparent 0 118px,rgba(10,50,24,.55) 118px 120px),
     repeating-linear-gradient(90deg,transparent 0 118px,rgba(10,50,24,.55) 118px 120px)}
   .login-lado>*{position:relative;background:#0f4a24;padding:6px 14px;width:fit-content;max-width:480px}
@@ -350,7 +350,7 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 
 /* ---------- Prioridade: legenda colorida que também filtra ---------- */
 .prio-barra{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
-.prio{--c:#8a93a0;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 6px 0 12px;border:1.5px solid color-mix(in srgb,var(--c) 45%,#fff);background:color-mix(in srgb,var(--c) 8%,#fff);color:var(--tinta);border-radius:999px;text-decoration:none;font-size:.88rem;font-weight:600}
+.prio{--c:#8a93a0;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 6px 0 12px;border:1.5px solid #cbd5e1;background:#f8fafc;color:var(--tinta);border-radius:999px;text-decoration:none;font-size:.88rem;font-weight:600}
 .prio i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
 .prio b{min-width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--c);color:#fff;font-size:.8rem;padding:0 7px}
 .prio:hover{border-color:var(--c)}
@@ -376,7 +376,8 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 @media(max-width:759px){.cards.compactos{grid-template-columns:1fr;grid-auto-rows:auto}}
 
 /* ---------- Campos de data: texto centralizado e sem "data fantasma" no Safari ---------- */
-input[type=date]{display:flex;align-items:center;line-height:1.2;padding:0 10px 0 12px}
+input[type=date]{line-height:1.2;padding:0 10px 0 12px}
+@supports selector(input::-webkit-datetime-edit){input[type=date]{display:flex;align-items:center}}
 input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:1.3em}
 input[type=date]::-webkit-datetime-edit{padding:0;line-height:1.2}
 input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}
@@ -386,3 +387,15 @@ input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}
   .data-w.sem-data input[type=date]:not(:focus)::-webkit-datetime-edit{opacity:0}
   .data-w.sem-data .ph{display:block;position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#8a948c;pointer-events:none;font-size:16px}
 }
+
+@supports (background:color-mix(in srgb,red,blue)){
+  .prio{border-color:color-mix(in srgb,var(--c) 45%,#fff);background:color-mix(in srgb,var(--c) 8%,#fff)}
+  .prio.on{background:var(--c);border-color:var(--c)}
+}
+.prio.on{background:var(--c);border-color:var(--c);color:#fff}
+/* seleção da rota sem depender de :has() */
+.sel-card.marcado{border-color:var(--verde);background:#f3faf4}
+/* compatibilidade geral */
+html{-webkit-tap-highlight-color:transparent}
+button,.btn,.chip,.prio{-webkit-appearance:none;appearance:none}
+input,select,textarea,button{font-family:inherit}

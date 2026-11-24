@@ -41,4 +41,5 @@ $rotas = q('SELECT * FROM rotas WHERE data_rota = ? ORDER BY id', [$data])->fetc
 <table class="itens"><?php foreach (q('SELECT * FROM itens_pedido WHERE pedido_id = ?', [$p['id']])->fetchAll() as $i): ?><tr><td>☐ <?= qtd_fmt($i['quantidade']) ?> <?= h($i['unidade']) ?></td><td><?= h($i['descricao']) ?></td></tr><?php endforeach; ?></table>
 <div class="acoes-card no-print"><a class="btn peq" href="entrega.php?id=<?= $p['id'] ?>">Conferir entrega</a></div></div>
 <?php endforeach; ?></div><?php endforeach; ?>
+<script>document.querySelectorAll('.sel-card input[type=checkbox]').forEach(function(c){function a(){c.closest('.sel-card').classList.toggle('marcado',c.checked)}c.addEventListener('change',a);a()});</script>
 <?php if ($rotas): ?><div class="barra no-print"><button type="button" class="sec" onclick="window.print()">Imprimir rota</button></div><?php endif; rodape();
