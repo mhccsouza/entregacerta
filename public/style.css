@@ -520,3 +520,26 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .foto-item form{margin-top:4px}
 .erro[role=alert]{margin:10px 0}
 .nav-n{display:inline-block;min-width:1.3em;padding:0 .4em;margin-left:.25em;border-radius:99px;background:#f59e0b;color:#3b2300;font-size:.78rem;font-weight:700;text-align:center}
+
+/* Conferência: escolha explícita por item */
+.item-conf{padding:12px 4px;border-top:1px solid var(--linha)}
+.item-conf .ic-cab{display:flex;gap:12px;align-items:baseline;margin-bottom:8px}
+.item-conf .ic-cab .qtd{font-weight:700;min-width:64px;font-variant-numeric:tabular-nums}
+.item-conf.feito .ic-cab .txt{color:var(--suave)}
+.ic-base{margin:0 0 8px;padding:6px 10px;border-radius:8px;background:#fef3c7;color:#7c4a03;font-size:.92rem}
+.opcoes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.op{position:relative;margin:0;font-weight:600;cursor:pointer}
+.op input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.op span{display:flex;align-items:center;justify-content:center;min-height:48px;padding:6px 8px;text-align:center;border:2px solid var(--linha);border-radius:10px;background:#fff;font-size:.95rem}
+.op input:focus-visible + span{outline:3px solid #86efac;outline-offset:2px}
+.op-todo input:checked + span{background:#166534;border-color:#166534;color:#fff}
+.op-parte input:checked + span{background:#f59e0b;border-color:#f59e0b;color:#3b2300}
+.op-nada input:checked + span{background:#b91c1c;border-color:#b91c1c;color:#fff}
+.ic-parte,.ic-obs{margin-top:10px}
+.ic-parte[hidden],.ic-obs[hidden],.ic-base[hidden]{display:none}
+.ic-falta{margin:6px 0 0;font-weight:600;color:var(--com_pendencia)}
+.ic-falta.aviso{color:#92400e}
+.item-conf .diverge{margin:10px 0 0}
+.resumo-conf{margin:14px 0;padding:12px 14px;border-radius:10px;background:#f1f5f2;border:1px solid var(--linha);font-weight:600}
+.resumo-conf.ok{background:#dcfce7;border-color:#86efac;color:#14532d}
+.resumo-conf.pend{background:#fee2e2;border-color:#fca5a5;color:#7f1d1d}
