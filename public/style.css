@@ -402,3 +402,10 @@ input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}
 html{-webkit-tap-highlight-color:transparent}
 button,.btn,.chip,.prio{-webkit-appearance:none;appearance:none}
 input,select,textarea,button{font-family:inherit}
+
+/* login: nome ao lado do ícone */
+.login-in .login-marca{display:flex;align-items:center;gap:14px;min-width:0}
+.login-in .login-marca .logo{flex:none;width:54px;height:54px;margin:0;border-radius:11px}
+.login-in .login-marca>div{min-width:0}
+.login-in .login-marca h1{margin:0;line-height:1.15}
+.login-in .login-marca .sub{margin:2px 0 0;font-size:.9rem}

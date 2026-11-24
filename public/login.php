@@ -22,9 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <ul><li>Pedido cadastrado uma única vez</li><li>Depósito separa pela lista do dia</li><li>Rota montada e conferida na entrega</li></ul>
 </aside>
 <div class="login-box"><div class="login-in">
-  <span class="logo" aria-hidden="true"></span>
-  <h1><?= h(NOME_SISTEMA) ?></h1>
-  <p class="sub"><?= h(NOME_LOJA) ?> · Organização de entregas</p>
+  <div class="login-marca">
+    <span class="logo" aria-hidden="true"></span>
+    <div><h1><?= h(NOME_SISTEMA) ?></h1>
+    <p class="sub"><?= h(NOME_LOJA) ?> · Organização de entregas</p></div>
+  </div>
   <form method="post" class="card"><?= csrf_campo() ?>
     <?php if ($erro): ?><p class="erro" role="alert"><?= h($erro) ?></p><?php endif; ?>
     <label for="login">Usuário</label>
