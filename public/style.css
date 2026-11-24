@@ -362,8 +362,8 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 .cards.compactos{margin-top:14px}
 
 /* ---------- Cartões de pedido: mesmo tamanho ---------- */
-.cards.compactos{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-items:stretch;grid-auto-rows:1fr}
-.cards.compactos .ped-card{display:flex;flex-direction:column;height:100%}
+.cards.compactos{grid-template-columns:repeat(auto-fill,minmax(290px,1fr));align-items:start;grid-auto-rows:auto}
+.cards.compactos .ped-card{display:flex;flex-direction:column;height:auto;align-self:start}
 .cards.compactos .ped-card .pedido-cab{align-items:center;min-height:30px}
 .cards.compactos .ped-card .c-data{white-space:nowrap}
 .cards.compactos .ped-card .c-data b{font-size:1.02rem}
