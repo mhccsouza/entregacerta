@@ -554,3 +554,10 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .sugestoes button{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;width:100%;min-height:0;text-align:left;background:transparent;color:inherit;border:0;border-radius:8px;padding:10px 12px;font:inherit;cursor:pointer}
 .sugestoes button:hover,.sugestoes button:focus{background:#eef5ee;outline:none}
 .sugestoes span{font-size:.85rem;color:var(--suave)}
+
+/* Login: aviso de campo vazio e botão Mostrar fora do campo (não colide com o ícone de senhas do Safari) */
+.msg-campo{margin:6px 0 0;color:var(--com_pendencia);font-size:.88rem;font-weight:600}
+.login-in .senha-w{position:static;display:flex;gap:8px;align-items:stretch}
+.login-in .senha-w input{flex:1;min-width:0;padding-right:12px}
+.login-in .senha-w button{position:static;flex:none;min-height:0;padding:0 14px;border:1px solid var(--linha);background:#fff;color:var(--verde-esc)}
+.login-in input.campo-erro:focus{border-color:var(--com_pendencia)!important;box-shadow:0 0 0 3px rgba(185,28,28,.18)!important}

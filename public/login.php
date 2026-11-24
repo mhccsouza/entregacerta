@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div><h1><?= h(NOME_SISTEMA) ?></h1>
     <p class="sub"><?= h(NOME_LOJA) ?> · Organização de entregas</p></div>
   </div>
-  <form method="post" class="card"><?= csrf_campo() ?>
+  <form method="post" class="card" id="form-login" novalidate><?= csrf_campo() ?>
     <?php if ($erro): ?><p class="erro" role="alert"><?= h($erro) ?></p><?php endif; ?>
     <label for="login">Usuário</label>
     <input id="login" name="login" value="<?= h($login) ?>" autocomplete="username" autocapitalize="none" autocorrect="off" required <?= $erro ? '' : 'autofocus' ?>>
@@ -41,5 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
 var v=document.getElementById('ver'),s=document.getElementById('senha');
 v.onclick=function(){var m=s.type==='password';s.type=m?'text':'password';v.textContent=m?'Ocultar':'Mostrar';v.setAttribute('aria-pressed',m)};
+// Campo vazio: borda vermelha e aviso embaixo do campo (some assim que a pessoa digita)
+(function(){var f=document.getElementById('form-login'),campos=[['login','Informe o usuário.'],['senha','Informe a senha.']];
+function limpa(i){i.classList.remove('campo-erro');i.removeAttribute('aria-invalid');var m=document.getElementById('e-'+i.id);if(m)m.remove()}
+campos.forEach(function(c){var i=document.getElementById(c[0]);i.addEventListener('input',function(){limpa(i)})});
+f.addEventListener('submit',function(e){var primeiro=null;
+  campos.forEach(function(c){var i=document.getElementById(c[0]);limpa(i);
+    if(!i.value.trim()){i.classList.add('campo-erro');i.setAttribute('aria-invalid','true');
+      var m=document.createElement('p');m.id='e-'+i.id;m.className='msg-campo';m.setAttribute('role','alert');m.textContent=c[1];
+      (i.closest('.senha-w')||i).insertAdjacentElement('afterend',m);if(!primeiro)primeiro=i}});
+  if(primeiro){e.preventDefault();primeiro.focus()}});})();
 </script>
 </body></html>
