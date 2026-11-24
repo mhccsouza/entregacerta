@@ -3,10 +3,16 @@ require_once __DIR__ . '/config.php';
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $pdo = new PDO(DB_DSN, DB_USER, DB_PASS, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
+        try {
+            $pdo = new PDO(DB_DSN, DB_USER, DB_PASS, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            error_log('EntregaCerta: falha ao conectar ao banco: ' . $e->getMessage());
+            exit('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:system-ui;max-width:520px;margin:40px auto;padding:0 16px"><h1>Sem conexão com o banco de dados</h1><p>Confira o arquivo <code>inc/config.local.php</code> (nome do banco, usuário e senha do hPanel). Para ver o motivo exato, abra <code>diagnostico.php</code> no navegador e apague-o depois.</p></body>');
+        }
         if (strpos(DB_DSN, 'sqlite') === 0) { $pdo->exec('PRAGMA foreign_keys = ON'); }
     }
     return $pdo;
