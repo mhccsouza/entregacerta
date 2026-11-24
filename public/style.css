@@ -257,3 +257,11 @@ input:disabled{background:#e4e7e1;color:#8a948c;cursor:not-allowed}
 .ped-card.p-combinar .c-data b{color:#4b5563}
 .ped-nome{margin:8px 0 2px;font-size:1.02rem}
 details.mais summary{cursor:pointer;color:var(--verde);font-size:.88rem;padding:2px 0}
+
+/* paginação numerada */
+.paginas{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:20px 0 6px}
+.pg,.pg-gap{min-width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;font-weight:600;text-decoration:none}
+.pg{background:#fff;border:1.5px solid #aeb7a9;color:var(--verde-esc)}
+a.pg:hover{background:var(--verde-cl);border-color:var(--verde)}
+.pg.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.pg-gap{color:var(--suave)}

@@ -78,5 +78,15 @@ $pode_exc_adm = $u['perfil'] === 'admin' && !$elegivel; ?>
 <?php if ($pode_exc_adm): ?><form method="post" action="pedido_excluir.php" onsubmit="return confirm('EXCLUIR DEFINITIVAMENTE o pedido #<?= $p['id'] ?>, com itens e pendências? Use para pedidos de teste. Não é possível desfazer.')"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= $p['id'] ?>"><button class="perigo peq">Excluir definitivamente</button></form><?php endif; ?>
 </details><?php endif; ?></div>
 <?php endforeach; ?></div>
-<?php if ($paginas > 1): ?><nav class="paginas no-print" aria-label="Páginas"><?php if ($pag > 1): ?><a class="btn sec peq" href="<?= h(link_pag($pag - 1)) ?>">Anteriores</a><?php endif; ?><span>Página <?= $pag ?> de <?= $paginas ?></span><?php if ($pag < $paginas): ?><a class="btn sec peq" href="<?= h(link_pag($pag + 1)) ?>">Próximos</a><?php endif; ?></nav><?php endif; ?>
+<?php if ($paginas > 1):
+$mostrar = array_unique(array_filter(array_merge([1, $paginas], range(max(1, $pag - 2), min($paginas, $pag + 2))), fn($n) => $n >= 1 && $n <= $paginas)); sort($mostrar); ?>
+<nav class="paginas no-print" aria-label="Páginas de pedidos">
+<?php if ($pag > 1): ?><a class="pg" href="<?= h(link_pag($pag - 1)) ?>" aria-label="Página anterior">‹</a><?php endif; ?>
+<?php $ant = 0; foreach ($mostrar as $n): if ($n - $ant > 1): ?><span class="pg-gap">…</span><?php endif; $ant = $n; ?>
+<?php if ($n === $pag): ?><span class="pg on" aria-current="page"><?= $n ?></span><?php else: ?><a class="pg" href="<?= h(link_pag($n)) ?>"><?= $n ?></a><?php endif; ?>
+<?php endforeach; ?>
+<?php if ($pag < $paginas): ?><a class="pg" href="<?= h(link_pag($pag + 1)) ?>" aria-label="Próxima página">›</a><?php endif; ?>
+</nav>
+<p class="nota" style="text-align:center">Página <?= $pag ?> de <?= $paginas ?> · mostrando <?= ($pag - 1) * $por + 1 ?> a <?= min($total, $pag * $por) ?> de <?= $total ?> pedidos</p>
+<?php endif; ?>
 <?php endif; rodape();
