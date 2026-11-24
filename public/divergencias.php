@@ -8,6 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $d = q('SELECT * FROM divergencias WHERE id = ? AND resolvida = 0', [(int)($_POST['id'] ?? 0)])->fetch();
     if ($d) {
         $corrige = ($_POST['acao'] ?? '') === 'corrigir';
+        $motivo = mb_substr(trim((string)($_POST['motivo'] ?? '')), 0, 250);
+        if (!$corrige && $motivo === '') { header('Location: divergencias.php?sem_motivo=' . (int)$d['id']); exit; } // manter exige explicar
         if ($corrige) { q('UPDATE itens_pedido SET quantidade = ? WHERE id = ?', [$d['qtd_real'], $d['item_id']]); }
         else { // verificado: a quantidade certa era a cadastrada. Refaz a pendência em aberto (se houver) sobre ela.
             $pe = q('SELECT id, qtd_falta FROM pendencias WHERE item_id = ? AND resolvida = 0', [$d['item_id']])->fetch();
@@ -24,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        q('UPDATE divergencias SET resolvida = 1, resolucao = ?, resolvida_em = ' . (strpos(DB_DSN, 'sqlite') === 0 ? 'CURRENT_TIMESTAMP' : 'NOW()') . ' WHERE id = ?', [$corrige ? 'corrigido' : 'mantido', $d['id']]);
+        q('UPDATE divergencias SET resolvida = 1, resolucao = ?, resolucao_obs = ?, resolvida_por = ?, resolvida_em = ' . (strpos(DB_DSN, 'sqlite') === 0 ? 'CURRENT_TIMESTAMP' : 'NOW()') . ' WHERE id = ?', [$corrige ? 'corrigido' : 'mantido', $motivo, mb_substr((string)($u0['nome'] ?? ''), 0, 60), $d['id']]);
     }
     header('Location: divergencias.php'); exit;
 }
@@ -36,7 +38,8 @@ if (!$rows): ?><div class="vazio"><p>Nenhuma divergência para verificar.</p><a 
 <p><strong><?= h($r['descricao']) ?></strong><br>Cadastrado: <?= qtd_fmt($r['qtd_pedido']) ?> <?= h($r['unidade']) ?> · Informado na entrega: <strong><?= qtd_fmt($r['qtd_real']) ?> <?= h($r['unidade']) ?></strong></p>
 <?= $r['observacao'] ? '<p class="meta">Obs.: ' . h($r['observacao']) . '</p>' : '' ?>
 <form method="post" class="acoes-card no-print"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+<div class="motivo-div"><label for="m<?= (int)$r['id'] ?>">Motivo da decisão (obrigatório para manter)</label><input id="m<?= (int)$r['id'] ?>" name="motivo" maxlength="250" autocomplete="off" placeholder="Ex.: conferi o talão e eram 2 sc mesmo" <?= (int)($_GET['sem_motivo'] ?? 0) === (int)$r['id'] ? 'class="campo-erro" autofocus' : '' ?>><?= (int)($_GET['sem_motivo'] ?? 0) === (int)$r['id'] ? '<p class="erro" role="alert">Explique o motivo para manter a quantidade cadastrada.</p>' : '' ?></div>
 <button name="acao" value="corrigir" class="peq">Corrigir pedido para <?= qtd_fmt($r['qtd_real']) ?> <?= h($r['unidade']) ?></button>
-<button name="acao" value="manter" class="peq sec">Manter <?= qtd_fmt($r['qtd_pedido']) ?> <?= h($r['unidade']) ?></button>
+<button name="acao" value="manter" class="peq sec" onclick="var i=this.form.motivo;if(!i.value.trim()){i.setCustomValidity('Explique o motivo para manter.');i.reportValidity();i.addEventListener('input',function(){i.setCustomValidity('')},{once:true});return false}">Manter <?= qtd_fmt($r['qtd_pedido']) ?> <?= h($r['unidade']) ?></button>
 <a class="btn sec peq" href="pedido_ver.php?id=<?= (int)$r['pedido_id'] ?>">Ver pedido / fotos</a></form></div>
 <?php endforeach; ?></div><?php rodape();

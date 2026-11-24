@@ -67,12 +67,16 @@ function divergencia_garante(): void {
     static $ok = false;
     if ($ok) { return; }
     $ok = true;
-    try { q('SELECT 1 FROM divergencias LIMIT 1'); }
+    try { q('SELECT resolucao_obs, resolvida_por FROM divergencias LIMIT 1'); return; } catch (Throwable $e) { /* cria ou completa abaixo */ }
+    try { q('SELECT 1 FROM divergencias LIMIT 1'); // tabela da versao anterior: acrescenta as colunas do motivo
+        db()->exec('ALTER TABLE divergencias ADD COLUMN resolucao_obs ' . (strpos(DB_DSN, 'sqlite') === 0 ? 'TEXT' : 'VARCHAR(255) NULL'));
+        db()->exec('ALTER TABLE divergencias ADD COLUMN resolvida_por ' . (strpos(DB_DSN, 'sqlite') === 0 ? 'TEXT' : 'VARCHAR(60) NULL'));
+    }
     catch (Throwable $e) {
         $sqlite = strpos(DB_DSN, 'sqlite') === 0;
         db()->exec($sqlite
-            ? 'CREATE TABLE IF NOT EXISTS divergencias (id INTEGER PRIMARY KEY AUTOINCREMENT, pedido_id INTEGER NOT NULL, item_id INTEGER NOT NULL, qtd_pedido REAL NOT NULL, qtd_real REAL NOT NULL, observacao TEXT, resolvida INTEGER NOT NULL DEFAULT 0, resolucao TEXT, criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em TEXT)'
-            : 'CREATE TABLE IF NOT EXISTS divergencias (id INT AUTO_INCREMENT PRIMARY KEY, pedido_id INT NOT NULL, item_id INT NOT NULL, qtd_pedido DECIMAL(10,2) NOT NULL, qtd_real DECIMAL(10,2) NOT NULL, observacao VARCHAR(255) NULL, resolvida TINYINT(1) NOT NULL DEFAULT 0, resolucao VARCHAR(20) NULL, criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em DATETIME NULL, INDEX (pedido_id), INDEX (resolvida)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+            ? 'CREATE TABLE IF NOT EXISTS divergencias (id INTEGER PRIMARY KEY AUTOINCREMENT, pedido_id INTEGER NOT NULL, item_id INTEGER NOT NULL, qtd_pedido REAL NOT NULL, qtd_real REAL NOT NULL, observacao TEXT, resolvida INTEGER NOT NULL DEFAULT 0, resolucao TEXT, resolucao_obs TEXT, resolvida_por TEXT, criada_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em TEXT)'
+            : 'CREATE TABLE IF NOT EXISTS divergencias (id INT AUTO_INCREMENT PRIMARY KEY, pedido_id INT NOT NULL, item_id INT NOT NULL, qtd_pedido DECIMAL(10,2) NOT NULL, qtd_real DECIMAL(10,2) NOT NULL, observacao VARCHAR(255) NULL, resolvida TINYINT(1) NOT NULL DEFAULT 0, resolucao VARCHAR(20) NULL, resolucao_obs VARCHAR(255) NULL, resolvida_por VARCHAR(60) NULL, criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, resolvida_em DATETIME NULL, INDEX (pedido_id), INDEX (resolvida)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
     }
 }
 function fotos_garante(): void {

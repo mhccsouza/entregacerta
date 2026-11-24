@@ -543,3 +543,5 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .resumo-conf{margin:14px 0;padding:12px 14px;border-radius:10px;background:#f1f5f2;border:1px solid var(--linha);font-weight:600}
 .resumo-conf.ok{background:#dcfce7;border-color:#86efac;color:#14532d}
 .resumo-conf.pend{background:#fee2e2;border-color:#fca5a5;color:#7f1d1d}
+.motivo-div{flex:1 1 100%;width:100%;margin-bottom:8px}
+.motivo-div .erro{margin:6px 0 0}
