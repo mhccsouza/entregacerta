@@ -3,6 +3,7 @@
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc');
 require_once INC . '/auth.php';
 $u = usuario();
+if (!$u && ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') { $_SESSION['volta'] = 'foto.php?id=' . (int)($_GET['id'] ?? 0); header('Location: login.php'); exit; }
 if (!$u || !in_array($u['perfil'], ['admin', 'balcao', 'rota'], true)) { http_response_code(403); exit('Acesso negado.'); }
 fotos_garante();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { // remover (só administrador)

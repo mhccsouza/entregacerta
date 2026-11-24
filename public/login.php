@@ -10,7 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($u && password_verify($_POST['senha'] ?? '', $u['senha_hash'])) {
         session_regenerate_id(true);
         $_SESSION['u'] = ['id' => (int)$u['id'], 'nome' => $u['nome'], 'perfil' => $u['perfil']];
-        header('Location: index.php'); exit;
+        $volta = $_SESSION['volta'] ?? ''; unset($_SESSION['volta']);
+        header('Location: ' . (preg_match('/^[a-z_]+\.php(\?[A-Za-z0-9_=&%.\-]*)?$/', $volta) && strpos($volta, 'logout') !== 0 && strpos($volta, 'novidades') !== 0 ? $volta : 'index.php')); exit;
     }
     $erro = 'Usuário ou senha incorretos. Confira os dados e tente de novo.';
 }
