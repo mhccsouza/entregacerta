@@ -18,7 +18,7 @@ function topo(string $titulo, array $perfis = [], string $sub = ''): array {
     $agrupa = ['entrega.php' => 'rota.php'];
     $atual = $agrupa[$atual] ?? $atual;
     echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f4a24">';
-    echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css?v=' . (int)@filemtime(dirname($_SERVER["SCRIPT_FILENAME"]) . "/style.css") . '"><style>input[type=date]{-webkit-appearance:none;appearance:none;display:block;height:auto;min-height:46px;box-sizing:border-box;padding:12px 10px 12px 12px;line-height:20px;text-align:left}input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:20px;line-height:20px;display:block}input[type=date]::-webkit-datetime-edit{padding:0;line-height:20px}input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0}</style></head><body>';
+    echo '<title>' . h($titulo) . ' – ' . h(NOME_SISTEMA) . ' · ' . h(NOME_LOJA) . '</title><link rel="stylesheet" href="style.css?v=' . (int)@filemtime(dirname($_SERVER["SCRIPT_FILENAME"]) . "/style.css") . '"></head><body>';
     echo '<header class="topo no-print"><div class="topo-in"><a class="marca" href="index.php"><span class="logo" aria-hidden="true"></span><span>' . h(NOME_SISTEMA) . '<small>' . h(NOME_LOJA) . '</small></span></a><nav class="nav" aria-label="Menu principal">';
     foreach ($menu as $arq => [$nome, $ok]) {
         if ($u['perfil'] === 'admin' || in_array($u['perfil'], $ok, true)) {
