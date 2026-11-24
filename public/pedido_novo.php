@@ -48,15 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Cliente: nunca altera o cadastro que outros pedidos já usam (o endereço de pedidos antigos não pode mudar).
             // - editando um pedido cujo cliente só tem ele: corrige o cadastro no lugar;
-            // - senão: reaproveita o cliente com o MESMO nome, telefone e endereço; se o endereço (ou o telefone) é outro, cria um cadastro novo.
+            // - senão: reaproveita o cliente só se TODOS os dados são iguais (nome, telefone, endereço, bairro e referência); qualquer mudança, mesmo pequena, cria um cadastro novo.
             $cid = null;
             $atual = $id ? (int)q('SELECT cliente_id FROM pedidos WHERE id = ?', [$id])->fetchColumn() : 0;
             if ($atual && (int)q('SELECT COUNT(*) FROM pedidos WHERE cliente_id = ?', [$atual])->fetchColumn() === 1) {
                 $cid = $atual;
                 q('UPDATE clientes SET nome=?, telefone=?, endereco=?, bairro=?, referencia=? WHERE id=?', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia'],$cid]);
             } else {
-                $c = q("SELECT id FROM clientes WHERE nome = ? AND COALESCE(telefone, '') = ? AND endereco = ? ORDER BY id DESC LIMIT 1", [$v['nome'], $v['telefone'], $v['endereco']])->fetch();
-                if ($c) { $cid = (int)$c['id']; q('UPDATE clientes SET bairro=?, referencia=? WHERE id=?', [$v['bairro'],$v['referencia'],$cid]); }
+                $c = q("SELECT id FROM clientes WHERE nome = ? AND COALESCE(telefone, '') = ? AND endereco = ? AND COALESCE(bairro, '') = ? AND COALESCE(referencia, '') = ? ORDER BY id DESC LIMIT 1", [$v['nome'], $v['telefone'], $v['endereco'], $v['bairro'], $v['referencia']])->fetch();
+                if ($c) { $cid = (int)$c['id']; } // nada mudou: reaproveita o cadastro
                 else {
                     q('INSERT INTO clientes (nome, telefone, endereco, bairro, referencia) VALUES (?,?,?,?,?)', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia']]);
                     $cid = (int)$pdo->lastInsertId();

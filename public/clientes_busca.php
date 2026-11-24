@@ -17,7 +17,7 @@ if (strlen($dig) >= 3) { $sql .= " OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,'
 $sql .= ' ORDER BY id DESC LIMIT 40';
 $out = []; $vistos = [];
 foreach (q($sql, $par)->fetchAll() as $c) {
-    $chave = mb_strtolower($c['nome']) . '|' . $c['telefone'] . '|' . mb_strtolower($c['endereco']);
+    $chave = mb_strtolower($c['nome']) . '|' . $c['telefone'] . '|' . mb_strtolower($c['endereco']) . '|' . mb_strtolower((string)$c['bairro']) . '|' . mb_strtolower((string)$c['referencia']);
     if (isset($vistos[$chave])) { continue; } $vistos[$chave] = 1;
     $rua = $c['endereco']; $num = ''; $comp = '';
     if (preg_match('/^(.*?),\s*(\d[\w\/-]*|s\/?n)(?:\s+-\s+(.+))?$/iu', $c['endereco'], $m)) { $rua = trim($m[1]); $num = $m[2]; $comp = $m[3] ?? ''; }
