@@ -8,7 +8,7 @@ curl -s -b /tmp/c1 -o /dev/null -w "pedido 1: %{http_code} %{redirect_url}\n" --
 T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
 curl -s -b /tmp/c1 -o /dev/null -w "pedido 2: %{http_code}\n" --data-urlencode "csrf=$T" --data-urlencode "nome=Outro Cliente" --data-urlencode "endereco=Av. Teste 5" --data-urlencode "bairro=Pernambues" --data-urlencode "vendedor=Bruno" --data-urlencode "data_entrega=$D" --data-urlencode "qtd[]=1" --data-urlencode "un[]=un" --data-urlencode "desc[]=Nivelador" $B/pedido_novo.php
 echo "-- validacao sem itens:"; T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
-curl -s -b /tmp/c1 --data-urlencode "csrf=$T" --data-urlencode "nome=X" $B/pedido_novo.php | grep -o 'class="erro">[^<]*'
+curl -s -b /tmp/c1 --data-urlencode "csrf=$T" --data-urlencode "nome=X" $B/pedido_novo.php | grep -o 'role="alert">[^<]*'
 echo "-- CSRF invalido:"; curl -s -b /tmp/c1 -o /dev/null -w "%{http_code}\n" -d "csrf=zzz&nome=x" $B/pedido_novo.php
 echo "-- perfis (balcao->separacao, deposito->pedido_novo; esperado 403 403):"; curl -s -b /tmp/c1 -o /dev/null -w "%{http_code} " $B/separacao.php; curl -s -b /tmp/c2 -o /dev/null -w "%{http_code}\n" $B/pedido_novo.php
 echo "-- sem login:"; curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" $B/pedidos.php
@@ -33,7 +33,7 @@ echo "-- resolver pendencia:"
 curl -s -b /tmp/c3 $B/pendencias.php > /tmp/pen.html; T=$(tok </tmp/pen.html)
 curl -s -b /tmp/c3 -o /dev/null --data "csrf=$T&id=1&pedido_id=1" $B/pendencias.php
 php tests/sql.php -q "select 'pedido '||id||' '||status as s from pedidos where id=1"
-echo "-- painel:"; curl -s -b /tmp/c3 $B/index.php | grep -o '<strong style="font-size:1.8rem">[0-9]*</strong><br>[^<]*' | sed 's/<[^>]*>/ /g'
+echo "-- painel:"; curl -s -b /tmp/c3 $B/index.php | grep -o '<strong class="num">[0-9]*</strong><span>[^<]*' | sed 's/<[^>]*>/ /g'
 echo "-- EDITAR / EXCLUIR (balcao):"
 D2=$(date -d "+2 day" +%F)
 T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
