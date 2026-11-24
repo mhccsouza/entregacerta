@@ -50,3 +50,21 @@ curl -s -b /tmp/c1 -o /dev/null -w "excluir: %{http_code} %{redirect_url}\n" -d 
 php tests/sql.php -q "select 'restam '||count(*)||' pedido(s) com id=$NID; itens: '||(select count(*) from itens_pedido where pedido_id=$NID) as s from pedidos where id=$NID"
 echo "excluir pedido ja em rota (2) -> bloqueado:"; curl -s -b /tmp/c1 -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=2" $B/pedido_excluir.php
 echo "deposito tenta excluir (403):"; curl -s -b /tmp/c2 -o /dev/null -w "%{http_code}\n" -d "csrf=x&id=1" $B/pedido_excluir.php
+echo "-- CANCELAR (admin) pedido ja separado:"
+login /tmp/ad admin senha12345
+D3=$(date -d "+4 day" +%F)
+T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
+curl -s -b /tmp/c1 -o /dev/null --data-urlencode "csrf=$T" --data-urlencode "nome=Desistiu" --data-urlencode "endereco=Rua D" --data-urlencode "vendedor=Ione" --data-urlencode "data_entrega=$D3" --data-urlencode "qtd[]=2" --data-urlencode "un[]=cx" --data-urlencode "desc[]=Piso X" $B/pedido_novo.php
+CID=$(php tests/sql.php -q "select max(id) as m from pedidos")
+curl -s -b /tmp/c2 "$B/separacao.php?data=$D3" > /tmp/s.html; T=$(tok </tmp/s.html); IT=$(php tests/sql.php -q "select max(id) as m from itens_pedido")
+curl -s -b /tmp/c2 -o /dev/null --data "csrf=$T&data=$D3&sep[]=$IT" $B/separacao.php
+php tests/sql.php -q "select 'antes: pedido $CID '||status as s from pedidos where id=$CID"
+echo "balcao tenta cancelar (403):"; curl -s -b /tmp/c1 -o /dev/null -w "%{http_code}\n" -d "csrf=x&id=$CID&motivo=x" $B/pedido_cancelar.php
+echo "balcao NAO ve campo de cancelar:"; curl -s -b /tmp/c1 "$B/pedidos.php?data=$D3" | grep -c 'pedido_cancelar.php'
+echo "admin ve:"; curl -s -b /tmp/ad "$B/pedidos.php?data=$D3" > /tmp/p.html; grep -c 'pedido_cancelar.php' /tmp/p.html; T=$(tok </tmp/p.html)
+echo "sem motivo:"; curl -s -b /tmp/ad -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=$CID&motivo=" $B/pedido_cancelar.php
+curl -s -b /tmp/ad -o /dev/null -w "cancelar: %{redirect_url}\n" --data-urlencode "csrf=$T" -d "id=$CID" --data-urlencode "motivo=Cliente desistiu da compra" $B/pedido_cancelar.php
+php tests/sql.php -q "select 'depois: pedido $CID '||status||' | '||observacao as s from pedidos where id=$CID"
+echo "some da separacao:"; curl -s -b /tmp/c2 "$B/separacao.php?data=$D3" | grep -c "Pedido #$CID"
+echo "some da lista geral:"; curl -s -b /tmp/c1 "$B/pedidos.php" | grep -c "#$CID ·"
+echo "entregue nao cancela:"; curl -s -b /tmp/ad -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=1&motivo=x" $B/pedido_cancelar.php

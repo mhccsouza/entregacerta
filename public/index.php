@@ -5,9 +5,9 @@ topo('Painel');
 $hoje = date('Y-m-d');
 $st = ['aguardando','separado','em_rota','entregue','com_pendencia'];
 $hojeC = q("SELECT status, COUNT(*) n FROM pedidos WHERE data_entrega = ? GROUP BY status", [$hoje])->fetchAll(PDO::FETCH_KEY_PAIR);
-$abertoC = q("SELECT status, COUNT(*) n FROM pedidos WHERE status <> 'entregue' GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
+$abertoC = q("SELECT status, COUNT(*) n FROM pedidos WHERE status NOT IN ('entregue','cancelado') GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
 $pend = (int)q('SELECT COUNT(*) FROM pendencias WHERE resolvida = 0')->fetchColumn();
-$prox = q("SELECT MIN(data_entrega) FROM pedidos WHERE status <> 'entregue'")->fetchColumn();
+$prox = q("SELECT MIN(data_entrega) FROM pedidos WHERE status NOT IN ('entregue','cancelado')")->fetchColumn();
 ?>
 <h2>Pedidos em aberto (todas as datas)</h2>
 <?php if ($prox): ?><p>Próxima data com entrega pendente: <a href="pedidos.php?data=<?= h($prox) ?>"><strong><?= data_br($prox) ?></strong></a></p><?php endif; ?>

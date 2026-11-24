@@ -21,7 +21,7 @@ function h($v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'
 function data_br(?string $d): string { return $d ? date('d/m/Y', strtotime($d)) : ''; }
 function qtd_fmt($n): string { $n = (float)$n; return rtrim(rtrim(number_format($n, 2, ',', ''), '0'), ','); }
 function status_nome(string $s): string {
-    return ['aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','entregue'=>'Entregue','com_pendencia'=>'Com pendência'][$s] ?? $s;
+    return ['aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','entregue'=>'Entregue','com_pendencia'=>'Com pendência','cancelado'=>'Cancelado'][$s] ?? $s;
 }
 
 // Data padrão das telas: a mais antiga com pedido pendente (ou hoje, se não houver).
