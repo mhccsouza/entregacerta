@@ -491,5 +491,5 @@ body.sem-rolagem{overflow:hidden}
 @media(min-width:720px){
  .grid-end .g-nome{grid-column:span 7}.grid-end .g-tel{grid-column:span 5}
  .grid-end .g-cep{grid-column:span 3}.grid-end .g-rua{grid-column:span 6}.grid-end .g-num{grid-column:span 3}
- .grid-end .g-bairro{grid-column:span 5}.grid-end .g-ref{grid-column:span 7}
+ .grid-end .g-comp{grid-column:span 4}.grid-end .g-bairro{grid-column:span 4}.grid-end .g-ref{grid-column:span 4}
 }

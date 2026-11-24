@@ -14,12 +14,12 @@ if ($id) {
     }
     if ($bloqueado) { echo '<p class="erro">' . h($bloqueado) . '</p><p><a class="btn sec" href="pedidos.php">Voltar</a></p>'; rodape(); exit; }
 }
-$v = ['nome'=>'','telefone'=>'','endereco'=>'','rua'=>'','numero'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];
+$v = ['nome'=>'','telefone'=>'','endereco'=>'','rua'=>'','numero'=>'','complemento'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];
 $itens = [['qtd'=>'','un'=>'cx','desc'=>'']];
 if ($id && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     foreach (['nome','telefone','endereco','bairro','referencia','vendedor','data_entrega','observacao'] as $k) { $v[$k] = (string)($ped[$k] ?? ''); }
     // o banco guarda "Rua, número" em um campo só; aqui separamos de volta para a tela
-    if (preg_match('/^(.*),\s*(\d[\w\/-]*|s\/?n)$/iu', $v['endereco'], $m)) { $v['rua'] = trim($m[1]); $v['numero'] = $m[2]; } else { $v['rua'] = $v['endereco']; }
+    if (preg_match('/^(.*?),\s*(\d[\w\/-]*|s\/?n)(?:\s+-\s+(.+))?$/iu', $v['endereco'], $m)) { $v['rua'] = trim($m[1]); $v['numero'] = $m[2]; $v['complemento'] = $m[3] ?? ''; } else { $v['rua'] = $v['endereco']; }
     $itens = [];
     foreach (q('SELECT quantidade, unidade, descricao FROM itens_pedido WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll() as $i) { $itens[] = ['qtd'=>qtd_fmt($i['quantidade']), 'un'=>$i['unidade'], 'desc'=>$i['descricao']]; }
 }
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $itens[] = ['qtd'=>$qtd, 'un'=>$un, 'desc'=>$desc];
     }
     if ($v['nome']==='') $erros[] = 'Informe o nome do cliente.';
-    $v['endereco'] = $v['rua'] === '' ? '' : $v['rua'] . ($v['numero'] !== '' ? ', ' . $v['numero'] : '');
+    $v['endereco'] = $v['rua'] === '' ? '' : $v['rua'] . ($v['numero'] !== '' ? ', ' . $v['numero'] : '') . ($v['rua'] !== '' && $v['complemento'] !== '' ? ' - ' . $v['complemento'] : '');
     if ($v['rua']==='') $erros[] = 'Informe a rua.';
     if ($v['numero']==='') $erros[] = 'Informe o número (ou s/n se não houver).';
     if ($v['vendedor']==='') $erros[] = 'Informe o vendedor.';
@@ -80,8 +80,9 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <div class="g-cep"><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche rua e bairro.</p></div>
 <div class="g-rua"><label class="req" for="rua">Rua</label><input id="rua" name="rua" value="<?= h($v['rua']) ?>" autocomplete="off" required></div>
 <div class="g-num"><label class="req" for="numero">Número</label><input id="numero" name="numero" value="<?= h($v['numero']) ?>" maxlength="12" placeholder="s/n" autocomplete="off" required></div>
+<div class="g-comp"><label for="complemento">Complemento <span class="nota sem-margem">(opcional)</span></label><input id="complemento" name="complemento" value="<?= h($v['complemento']) ?>" maxlength="60" placeholder="Ex.: apto 302, bloco B" autocomplete="off"></div>
 <div class="g-bairro"><label for="bairro">Bairro</label><input id="bairro" name="bairro" list="bairros" value="<?= h($v['bairro']) ?>" autocomplete="off"><datalist id="bairros"><?php foreach (q("SELECT DISTINCT bairro FROM clientes WHERE bairro <> '' ORDER BY bairro")->fetchAll(PDO::FETCH_COLUMN) as $b): ?><option value="<?= h($b) ?>"><?php endforeach; ?></datalist></div>
-<div class="g-ref"><label for="referencia">Ponto de referência</label><input id="referencia" name="referencia" value="<?= h($v['referencia']) ?>" placeholder="Ex.: ao lado da padaria, portão azul" autocomplete="off"></div>
+<div class="g-ref"><label for="referencia">Ponto de referência</label><input id="referencia" name="referencia" value="<?= h($v['referencia']) ?>" placeholder="Ex.: portão azul" autocomplete="off"></div>
 </div></div>
 
 <div class="card"><h2>Entrega e venda</h2><div class="grid">
@@ -134,7 +135,7 @@ cep.addEventListener('input',function(){var d=cep.value.replace(/\D/g,'').slice(
  fetch('https://viacep.com.br/ws/'+d+'/json/',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){clearTimeout(tm);
   if(j.erro){cepMsg.textContent='CEP não encontrado. Preencha a rua manualmente.';return}
   var ru=document.getElementById('rua'),nu=document.getElementById('numero'),ba=document.getElementById('bairro');
-  ru.value=j.logradouro||'';nu.value='';ba.value=j.bairro||'';ru.classList.remove('campo-erro');ba.classList.remove('campo-erro');
+  ru.value=j.logradouro||'';nu.value='';document.getElementById('complemento').value='';ba.value=j.bairro||'';ru.classList.remove('campo-erro');ba.classList.remove('campo-erro');
   cepMsg.textContent=j.logradouro?'Preenchido. Informe o número.':'CEP sem rua (CEP geral da cidade). Informe a rua.';(j.logradouro?nu:ru).focus()
  }).catch(function(){clearTimeout(tm);cepMsg.textContent='Não foi possível consultar o CEP agora. Preencha a rua manualmente.'})});
 // atalhos de data
