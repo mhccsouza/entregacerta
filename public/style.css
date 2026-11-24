@@ -347,3 +347,16 @@ button.peq,.btn.peq{min-height:38px;height:auto}
 .sel-ordem input{padding:0 4px;text-align:center}
 .barra{align-items:center}
 .login-in .logo{display:block}
+
+/* ---------- Prioridade: legenda colorida que também filtra ---------- */
+.prio-barra{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.prio{--c:#8a93a0;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 6px 0 12px;border:1.5px solid color-mix(in srgb,var(--c) 45%,#fff);background:color-mix(in srgb,var(--c) 8%,#fff);color:var(--tinta);border-radius:999px;text-decoration:none;font-size:.88rem;font-weight:600}
+.prio i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
+.prio b{min-width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--c);color:#fff;font-size:.8rem;padding:0 7px}
+.prio:hover{border-color:var(--c)}
+.prio.on{background:var(--c);color:#fff;border-color:var(--c)}
+.prio.on i{background:#fff}.prio.on b{background:#fff;color:var(--c)}
+.prio.p-atrasado{--c:var(--com_pendencia)}.prio.p-hoje{--c:var(--aguardando)}.prio.p-amanha{--c:#b8860b}
+.prio.p-semana{--c:var(--separado)}.prio.p-mais{--c:#6b7280}.prio.p-combinar{--c:#64748b}
+.ped-card.p-mais{border-left-color:#9ca3af}
+.cards.compactos{margin-top:14px}

@@ -81,9 +81,10 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <div class="card"><h2>Entrega e venda</h2><div class="grid">
 <?php $comb = $v['data_entrega'] === A_COMBINAR; ?>
 <div><label class="req" for="data_entrega">Data da entrega</label><input id="data_entrega" type="date" name="data_entrega" value="<?= h($comb ? date('Y-m-d', strtotime('+1 day')) : $v['data_entrega']) ?>" <?= $comb ? 'disabled' : 'required' ?>>
+<div class="chips" id="atalhos-data" <?= $comb ? 'hidden' : '' ?>><button type="button" class="chip" data-d="0">Hoje</button><button type="button" class="chip" data-d="1">Amanhã</button><button type="button" class="chip" data-d="2">Depois de amanhã</button></div>
 <label class="marcar" for="a_combinar"><input type="checkbox" id="a_combinar" name="a_combinar" value="1" <?= $comb ? 'checked' : '' ?>> A combinar com o cliente</label>
 <p class="nota" id="nota-combinar" <?= $comb ? '' : 'hidden' ?>>O pedido fica na lista sem data. Quando o cliente definir o prazo, edite o pedido e escolha a data.</p>
-<div class="chips" id="atalhos-data" <?= $comb ? 'hidden' : '' ?>><button type="button" class="chip" data-d="0">Hoje</button><button type="button" class="chip" data-d="1">Amanhã</button><button type="button" class="chip" data-d="2">Depois de amanhã</button></div></div>
+</div>
 <div><label class="req" for="vendedor">Vendedor</label><select id="vendedor" name="vendedor" required><option value="">Escolha o vendedor</option>
 <?php $nomesV = array_column(vendedores(), 'nome'); if ($v['vendedor'] !== '' && !in_array($v['vendedor'], $nomesV, true)) { $nomesV[] = $v['vendedor']; } foreach ($nomesV as $nv): ?><option value="<?= h($nv) ?>" <?= $v['vendedor'] === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select>
 <?php if (!$nomesV): ?><p class="nota">Nenhum vendedor cadastrado. O administrador cadastra em Vendedores.</p><?php endif; ?>

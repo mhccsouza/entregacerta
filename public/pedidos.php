@@ -11,6 +11,9 @@ if ($de && $ate && $de > $ate) { [$de, $ate] = [$ate, $de]; }
 $status = (string)($_GET['status'] ?? '');
 $validos = ['aguardando','separado','em_rota','com_pendencia','entregue','cancelado','a_combinar'];
 if (!in_array($status, $validos, true)) { $status = ''; }
+$prios = ['atrasado'=>'Atrasados','hoje'=>'Hoje','amanha'=>'Amanhã','semana'=>'Próximos 7 dias','adiante'=>'Mais adiante','combinar'=>'A combinar'];
+$prio = (string)($_GET['prio'] ?? ''); if (!isset($prios[$prio])) { $prio = ''; }
+$d1 = date('Y-m-d', strtotime('+1 day')); $d2 = date('Y-m-d', strtotime('+2 day')); $d7 = date('Y-m-d', strtotime('+7 day'));
 $vend = trim((string)($_GET['vendedor'] ?? ''));
 $busca = trim((string)($_GET['busca'] ?? ''));
 $pag = max(1, (int)($_GET['pag'] ?? 1)); $por = 30;
@@ -19,7 +22,18 @@ if ($de)  { $w[] = 'p.data_entrega >= ?'; $pr[] = $de; }
 if ($ate) { $w[] = 'p.data_entrega <= ?'; $pr[] = $ate; }
 if ($status === 'a_combinar') { $w[] = "p.status NOT IN ('entregue','cancelado') AND p.data_entrega = ?"; $pr[] = A_COMBINAR; }
 elseif ($status) { $w[] = 'p.status = ?'; $pr[] = $status; }
-elseif (!$de && !$ate) { $w[] = "p.status <> 'cancelado' AND (p.data_entrega >= ? OR p.status <> 'entregue')"; $pr[] = $hoje; }
+elseif (!$de && !$ate && !$prio) { $w[] = "p.status <> 'cancelado' AND (p.data_entrega >= ? OR p.status <> 'entregue')"; $pr[] = $hoje; }
+if ($prio) {
+    $w[] = "p.status NOT IN ('entregue','cancelado')";
+    switch ($prio) {
+        case 'atrasado': $w[] = 'p.data_entrega < ?'; $pr[] = $hoje; break;
+        case 'hoje':     $w[] = 'p.data_entrega = ?'; $pr[] = $hoje; break;
+        case 'amanha':   $w[] = 'p.data_entrega = ?'; $pr[] = $d1; break;
+        case 'semana':   $w[] = 'p.data_entrega BETWEEN ? AND ?'; array_push($pr, $d2, $d7); break;
+        case 'adiante':  $w[] = 'p.data_entrega > ? AND p.data_entrega <> ?'; array_push($pr, $d7, A_COMBINAR); break;
+        case 'combinar': $w[] = 'p.data_entrega = ?'; $pr[] = A_COMBINAR; break;
+    }
+}
 if ($vend !== '') { $w[] = 'p.vendedor = ?'; $pr[] = $vend; }
 if ($busca !== '') {
     $w[] = '(c.nome LIKE ? OR c.endereco LIKE ? OR c.bairro LIKE ? OR p.id = ?)';
@@ -47,7 +61,10 @@ function link_pag(int $n): string { $g = $_GET; $g['pag'] = $n; return 'pedidos.
 $nomesVend = array_column(vendedores(), 'nome'); // garante a tabela de vendedores
 foreach (q("SELECT DISTINCT vendedor FROM pedidos WHERE vendedor <> ''")->fetchAll(PDO::FETCH_COLUMN) as $n) { if (!in_array($n, $nomesVend, true)) { $nomesVend[] = $n; } }
 sort($nomesVend, SORT_NATURAL | SORT_FLAG_CASE);
-$filtrado = $de || $ate || $status || $vend !== '' || $busca !== '';
+$cont = q("SELECT SUM(CASE WHEN data_entrega < ? THEN 1 ELSE 0 END) a, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) h, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) m, SUM(CASE WHEN data_entrega BETWEEN ? AND ? THEN 1 ELSE 0 END) s, SUM(CASE WHEN data_entrega > ? AND data_entrega <> ? THEN 1 ELSE 0 END) f, SUM(CASE WHEN data_entrega = ? THEN 1 ELSE 0 END) c FROM pedidos WHERE status NOT IN ('entregue','cancelado')", [$hoje, $hoje, $d1, $d2, $d7, $d7, A_COMBINAR, A_COMBINAR])->fetch();
+$contagem = ['atrasado'=>(int)$cont['a'],'hoje'=>(int)$cont['h'],'amanha'=>(int)$cont['m'],'semana'=>(int)$cont['s'],'adiante'=>(int)$cont['f'],'combinar'=>(int)$cont['c']];
+$classe = ['atrasado'=>'p-atrasado','hoje'=>'p-hoje','amanha'=>'p-amanha','semana'=>'p-semana','adiante'=>'p-mais','combinar'=>'p-combinar'];
+$filtrado = $prio || $de || $ate || $status || $vend !== '' || $busca !== '';
 if (!empty($_GET['ok'])): ?><p class="ok">Pedido #<?= (int)$_GET['ok'] ?> salvo.</p><?php endif;
 if (!empty($_GET['excluido'])): ?><p class="ok">Pedido #<?= (int)$_GET['excluido'] ?> excluído.</p><?php endif;
 if (!empty($_GET['cancelado'])): ?><p class="ok">Pedido #<?= (int)$_GET['cancelado'] ?> cancelado. Avise o depósito para devolver os itens ao estoque, se já foram separados.</p><?php endif;
@@ -60,17 +77,17 @@ if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['blo
 <?php foreach (['a_combinar'=>'Data a combinar','aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','com_pendencia'=>'Com pendência','entregue'=>'Entregue','cancelado'=>'Cancelado'] as $k => $n): ?><option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= h($n) ?></option><?php endforeach; ?></select></div>
 <div><label for="de">Entrega de</label><input id="de" type="date" name="de" value="<?= h($de) ?>"></div>
 <div><label for="ate">até</label><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"></div></div>
-<div class="chips"><?php $atalhos = ['Hoje' => [$hoje, $hoje], 'Amanhã' => [date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+1 day'))], 'Próximos 7 dias' => [$hoje, date('Y-m-d', strtotime('+7 day'))], 'Esta semana' => [date('Y-m-d', strtotime('monday this week')), date('Y-m-d', strtotime('sunday this week'))]];
-foreach ($atalhos as $nome => [$d1, $d2]): $on = $de === $d1 && $ate === $d2; ?><a class="chip<?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php?' . http_build_query(array_filter(['de' => $d1, 'ate' => $d2, 'vendedor' => $vend, 'status' => $status, 'busca' => $busca]))) ?>"><?= h($nome) ?></a><?php endforeach; ?></div>
+<div class="prio-barra" role="group" aria-label="Filtrar por prioridade"><?php foreach ($prios as $k => $nome): $on = $prio === $k;
+$q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $status, 'busca' => $busca, 'de' => $de, 'ate' => $ate]); ?>
+<a class="prio <?= $classe[$k] ?><?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php' . ($q2 ? '?' . http_build_query($q2) : '')) ?>"><i></i><?= h($nome) ?><b><?= $contagem[$k] ?></b></a><?php endforeach; ?></div>
 <div class="barra"><button class="peq">Filtrar</button><?php if ($filtrado): ?><a class="btn sec peq" href="pedidos.php">Limpar filtros</a><?php endif; ?>
 <span class="nota sem-margem"><?= $total ?> <?= $total === 1 ? 'pedido' : 'pedidos' ?><?= $vend !== '' ? ' de ' . h($vend) : '' ?></span></div></form>
 <?php if (!$ps): ?><div class="vazio"><p>Nenhum pedido encontrado.</p><?php if (in_array($u['perfil'], ['admin','balcao'], true)): ?><a class="btn" href="pedido_novo.php">+ Cadastrar pedido</a><?php endif; ?></div><?php endif; ?>
-<?php if ($ps): $grupoAtual = null; $agrupar = !in_array($status, ['entregue','cancelado'], true) && !$de && !$ate; ?>
+<?php if ($ps): ?>
 <div class="cards compactos">
 <?php foreach ($ps as $p): [$pz, $pzc] = prazo($p['data_entrega'], $p['status']); $its = $itens[$p['id']] ?? [];
-$g = $agrupar ? grupo_prazo($p['data_entrega'], $p['status']) : '';
-if ($g !== $grupoAtual): $grupoAtual = $g; if ($g): ?><h2 class="grupo-tit <?= h($pzc ?: 'p-mais') ?>"><?= h($g) ?></h2><?php endif; endif; ?>
-<div class="card ped-card <?= $pzc ?>">
+?>
+<div class="card ped-card <?= $pzc ?: 'p-mais' ?>">
 <div class="pedido-cab"><span class="c-data"><b><?= data_br($p['data_entrega']) ?></b><?= $pz && $p['data_entrega'] !== A_COMBINAR ? ' <em class="prazo ' . $pzc . '">' . h($pz) . '</em>' : '' ?></span><?= stag($p['status']) ?></div>
 <p class="ped-nome"><strong>#<?= $p['id'] ?> · <?= h($p['nome']) ?></strong></p>
 <p class="meta"><?= h($p['bairro'] ?: 'Sem bairro') ?> · <b><?= h($p['vendedor']) ?></b></p>
