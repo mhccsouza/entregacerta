@@ -66,32 +66,34 @@ $entrega = '<b>Entrega: ' . data_br($p['data_entrega']) . '</b>' . ($pz && $p['d
 <button type="submit" name="foco" value="<?= $p['id'] ?>">Salvar e voltar à lista</button>
 <button type="button" class="sec todos">Marcar todos</button>
 <a class="btn sec" href="separacao_imprimir.php?ped=<?= (int)$p['id'] ?>" target="_blank" rel="noopener">Imprimir este pedido</a>
-<button type="button" class="sec fechar">Fechar sem salvar</button></div>
+<button type="button" class="sec fechar">Cancelar</button>
+<span class="nao-salvo" hidden>Marcações ainda não salvas</span></div>
 </div></div>
 <?php endforeach; ?></div>
 <?php endforeach; ?>
 <div class="sep-fundo no-print" id="sep-fundo"></div>
-<div class="barra barra-fixa no-print"><button>Salvar separação</button><a class="btn sec" href="separacao_imprimir.php?ver=<?= h($_GET['ver'] ?? 'todos') ?>" target="_blank" rel="noopener">Imprimir cupons (bobina)</a><span class="nao-salvo" id="nao-salvo" hidden>Há marcações ainda não salvas</span></div></form>
+<div class="barra no-print"><a class="btn sec" href="separacao_imprimir.php?ver=<?= h($_GET['ver'] ?? 'todos') ?>" target="_blank" rel="noopener">Imprimir cupons (bobina)</a></div></form>
 <script>
 (function(){
- var fundo=document.getElementById('sep-fundo'),aviso=document.getElementById('nao-salvo'),aberto=null;
+ var fundo=document.getElementById('sep-fundo'),aberto=null;
  function abre(it){aberto=it;it.querySelector('.sep-foco').classList.add('on');fundo.classList.add('on');document.body.classList.add('sem-rolagem');
   var k=it.querySelector('.sep-foco input[type=checkbox]');(k||it.querySelector('.sep-foco button')).focus()}
- function fecha(){if(!aberto)return;var it=aberto;it.querySelector('.sep-foco').classList.remove('on');fundo.classList.remove('on');document.body.classList.remove('sem-rolagem');aberto=null;it.querySelector('.sep-resumo').focus()}
- fundo.addEventListener('click',fecha);
+ function fecha(forca){if(!aberto)return;var it=aberto;if(!forca&&it.sujo()){var av=it.querySelector('.nao-salvo');av.hidden=false;av.classList.remove('pisca');void av.offsetWidth;av.classList.add('pisca');return}it.querySelector('.sep-foco').classList.remove('on');fundo.classList.remove('on');document.body.classList.remove('sem-rolagem');aberto=null;it.querySelector('.sep-resumo').focus()}
+ fundo.addEventListener('click',function(){fecha()});
  document.addEventListener('keydown',function(e){if(e.key==='Escape')fecha()});
  document.querySelectorAll('.sep-item').forEach(function(it){
-  var cks=it.querySelectorAll('.sep-foco input[type=checkbox]'),res=it.querySelector('.sep-resumo');
+  var cks=it.querySelectorAll('.sep-foco input[type=checkbox]'),res=it.querySelector('.sep-resumo'),av=it.querySelector('.nao-salvo'),orig=Array.prototype.map.call(cks,function(k){return k.checked});
+  it.sujo=function(){return Array.prototype.some.call(cks,function(k,i){return k.checked!==orig[i]})};
   function at(){var n=0;cks.forEach(function(k){if(k.checked)n++;k.closest('.check').classList.toggle('feito',k.checked)});
    it.querySelectorAll('.progresso i').forEach(function(b){b.style.width=(100*n/cks.length)+'%'});
    it.querySelectorAll('.prog-txt').forEach(function(t){t.textContent=n+' de '+cks.length+' itens separados'});
    res.classList.toggle('completo',n===cks.length&&n>0)}
   res.addEventListener('click',function(){abre(it)});
   res.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();abre(it)}});
-  it.addEventListener('change',function(){at();aviso.hidden=false});
-  it.querySelector('.todos').onclick=function(){var t=Array.prototype.some.call(cks,function(k){return !k.checked});cks.forEach(function(k){k.checked=t});at();aviso.hidden=false};
-  it.querySelector('.fechar').onclick=fecha;
-  it.querySelectorAll('.check').forEach(function(r){r.addEventListener('click',function(e){if(e.target.tagName!=='INPUT'&&e.target.tagName!=='LABEL'){var k=r.querySelector('input');k.checked=!k.checked;at();aviso.hidden=false}})});
+  it.addEventListener('change',function(){at();av.hidden=!it.sujo()});
+  it.querySelector('.todos').onclick=function(){var t=Array.prototype.some.call(cks,function(k){return !k.checked});cks.forEach(function(k){k.checked=t});at();av.hidden=!it.sujo()};
+  it.querySelector('.fechar').onclick=function(){cks.forEach(function(k,i){k.checked=orig[i]});at();av.hidden=true;fecha(true)};
+  it.querySelectorAll('.check').forEach(function(r){r.addEventListener('click',function(e){if(e.target.tagName!=='INPUT'&&e.target.tagName!=='LABEL'){var k=r.querySelector('input');k.checked=!k.checked;at();av.hidden=!it.sujo()}})});
   at();
  });
 })();

@@ -493,3 +493,5 @@ body.sem-rolagem{overflow:hidden}
  .grid-end .g-cep{grid-column:span 3}.grid-end .g-rua{grid-column:span 6}.grid-end .g-num{grid-column:span 3}
  .grid-end .g-comp{grid-column:span 4}.grid-end .g-bairro{grid-column:span 4}.grid-end .g-ref{grid-column:span 4}
 }
+
+.sep-foco .nao-salvo{align-self:center}.sep-foco .nao-salvo.pisca{animation:pisca .5s 2}@keyframes pisca{50%{background:#fde68a}}@media(prefers-reduced-motion:reduce){.sep-foco .nao-salvo.pisca{animation:none}}
