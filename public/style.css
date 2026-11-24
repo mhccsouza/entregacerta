@@ -496,3 +496,6 @@ body.sem-rolagem{overflow:hidden}
 }
 
 .sep-foco .nao-salvo{align-self:center}.sep-foco .nao-salvo.pisca{animation:pisca .5s 2}@keyframes pisca{50%{background:#fde68a}}@media(prefers-reduced-motion:reduce){.sep-foco .nao-salvo.pisca{animation:none}}
+
+/* campo com erro: enquanto está em foco usa o destaque normal; o vermelho volta ao sair se ainda estiver vazio */
+input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-color:var(--verde)!important}
