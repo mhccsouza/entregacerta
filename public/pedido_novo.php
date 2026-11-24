@@ -24,6 +24,7 @@ if ($id && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok();
     foreach ($v as $k => $_) { $v[$k] = trim($_POST[$k] ?? ''); }
+    if (!empty($_POST['a_combinar'])) { $v['data_entrega'] = A_COMBINAR; }
     $itens = [];
     foreach (($_POST['qtd'] ?? []) as $i => $qtd) {
         $qtd = str_replace(',', '.', trim($qtd)); $desc = trim($_POST['desc'][$i] ?? ''); $un = trim($_POST['un'][$i] ?? '');
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             foreach ($itens as $it) { q('INSERT INTO itens_pedido (pedido_id, quantidade, unidade, descricao) VALUES (?,?,?,?)', [$pid,(float)$it['qtd'],$it['un'],$it['desc']]); }
             $pdo->commit();
-            header('Location: pedidos.php?data=' . urlencode($v['data_entrega']) . '&ok=' . $pid); exit;
+            header('Location: pedidos.php?' . ($v['data_entrega'] === A_COMBINAR ? 'status=a_combinar' : 'data=' . urlencode($v['data_entrega'])) . '&ok=' . $pid); exit;
         } catch (Throwable $e) { $pdo->rollBack(); $erros[] = 'Não foi possível salvar o pedido. Tente novamente.'; }
     }
     if (!$itens) $itens = [['qtd'=>'','un'=>'cx','desc'=>'']];
@@ -78,8 +79,11 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <label for="referencia">Ponto de referência</label><input id="referencia" name="referencia" value="<?= h($v['referencia']) ?>" placeholder="Ex.: ao lado da padaria, portão azul" autocomplete="off"></div>
 
 <div class="card"><h2>Entrega e venda</h2><div class="grid">
-<div><label class="req" for="data_entrega">Data da entrega</label><input id="data_entrega" type="date" name="data_entrega" value="<?= h($v['data_entrega']) ?>" required>
-<div class="chips" id="atalhos-data"><button type="button" class="chip" data-d="0">Hoje</button><button type="button" class="chip" data-d="1">Amanhã</button><button type="button" class="chip" data-d="2">Depois de amanhã</button></div></div>
+<?php $comb = $v['data_entrega'] === A_COMBINAR; ?>
+<div><label class="req" for="data_entrega">Data da entrega</label><input id="data_entrega" type="date" name="data_entrega" value="<?= h($comb ? date('Y-m-d', strtotime('+1 day')) : $v['data_entrega']) ?>" <?= $comb ? 'disabled' : 'required' ?>>
+<label class="marcar" for="a_combinar"><input type="checkbox" id="a_combinar" name="a_combinar" value="1" <?= $comb ? 'checked' : '' ?>> A combinar com o cliente</label>
+<p class="nota" id="nota-combinar" <?= $comb ? '' : 'hidden' ?>>O pedido fica na lista sem data. Quando o cliente definir o prazo, edite o pedido e escolha a data.</p>
+<div class="chips" id="atalhos-data" <?= $comb ? 'hidden' : '' ?>><button type="button" class="chip" data-d="0">Hoje</button><button type="button" class="chip" data-d="1">Amanhã</button><button type="button" class="chip" data-d="2">Depois de amanhã</button></div></div>
 <div><label class="req" for="vendedor">Vendedor</label><input id="vendedor" name="vendedor" value="<?= h($v['vendedor']) ?>" autocomplete="off" required>
 <div class="chips" id="atalhos-vend"><button type="button" class="chip">Ione</button><button type="button" class="chip">Bruno</button></div></div>
 </div>
@@ -119,6 +123,9 @@ function iso(x){var d=new Date();d.setDate(d.getDate()+x);return d.getFullYear()
 function marcaData(){document.querySelectorAll('#atalhos-data .chip').forEach(function(c){c.classList.toggle('on',dt.value===iso(+c.dataset.d))})}
 document.getElementById('atalhos-data').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c){dt.value=iso(+c.dataset.d);marcaData()}});
 dt.addEventListener('input',marcaData);marcaData();
+var ac=document.getElementById('a_combinar');
+function combinar(){dt.disabled=ac.checked;dt.required=!ac.checked;document.getElementById('atalhos-data').hidden=ac.checked;document.getElementById('nota-combinar').hidden=!ac.checked;dt.classList.remove('campo-erro')}
+ac.addEventListener('change',combinar);combinar();
 // vendedor
 var vd=document.getElementById('vendedor');
 function marcaVend(){document.querySelectorAll('#atalhos-vend .chip').forEach(function(c){c.classList.toggle('on',vd.value.trim().toLowerCase()===c.textContent.toLowerCase())})}
@@ -126,7 +133,7 @@ document.getElementById('atalhos-vend').addEventListener('click',function(e){var
 vd.addEventListener('input',marcaVend);marcaVend();
 // validação amigável: foca no primeiro campo faltando
 document.getElementById('form-pedido').addEventListener('submit',function(e){
- var f=['nome','endereco','vendedor','data_entrega'].map(function(i){return document.getElementById(i)});
+ var f=['nome','endereco','vendedor'].concat(ac.checked?[]:['data_entrega']).map(function(i){return document.getElementById(i)});
  var falta=null;f.forEach(function(i){var vazio=!i.value.trim();i.classList.toggle('campo-erro',vazio);if(vazio&&!falta)falta=i});
  if(falta){e.preventDefault();falta.focus()}});
 })();

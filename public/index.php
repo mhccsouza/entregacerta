@@ -6,7 +6,9 @@ $hoje = date('Y-m-d');
 $hojeC = q("SELECT status, COUNT(*) n FROM pedidos WHERE data_entrega = ? AND status <> 'cancelado' GROUP BY status", [$hoje])->fetchAll(PDO::FETCH_KEY_PAIR);
 $abertoC = q("SELECT status, COUNT(*) n FROM pedidos WHERE status NOT IN ('entregue','cancelado') GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
 $pend = (int)q('SELECT COUNT(*) FROM pendencias WHERE resolvida = 0')->fetchColumn();
-$prox = q("SELECT MIN(data_entrega) FROM pedidos WHERE status NOT IN ('entregue','cancelado')")->fetchColumn();
+$prox = q("SELECT MIN(data_entrega) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega <> ?", [A_COMBINAR])->fetchColumn();
+$comb = (int)q("SELECT COUNT(*) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega = ?", [A_COMBINAR])->fetchColumn();
+$atras = (int)q("SELECT COUNT(*) FROM pedidos WHERE status NOT IN ('entregue','cancelado') AND data_entrega < ?", [date('Y-m-d')])->fetchColumn();
 $p = $u['perfil'];
 function card_stat(string $num, string $rotulo, string $cor, string $href = ''): string {
     $z = ((int)$num === 0) ? ' zero' : '';
@@ -29,6 +31,8 @@ function card_stat(string $num, string $rotulo, string $cor, string $href = ''):
 <?= card_stat((string)(int)($abertoC['em_rota'] ?? 0), 'Em rota', 'em_rota', 'rota.php') ?>
 <?= card_stat((string)(int)($abertoC['com_pendencia'] ?? 0), 'Com pendência', 'com_pendencia', 'pendencias.php') ?>
 <?= card_stat((string)$pend, 'Itens pendentes', 'com_pendencia', 'pendencias.php') ?>
+<?= card_stat((string)$atras, 'Atrasados', 'com_pendencia', 'pedidos.php') ?>
+<?= card_stat((string)$comb, 'Data a combinar', 'cancelado', 'pedidos.php?status=a_combinar') ?>
 </div>
 <h2>Entregas de hoje, <?= data_br($hoje) ?></h2>
 <div class="stats">

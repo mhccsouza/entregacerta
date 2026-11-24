@@ -24,7 +24,20 @@ function q(string $sql, array $p = []): PDOStatement {
     return $s;
 }
 function h($v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
-function data_br(?string $d): string { return $d ? date('d/m/Y', strtotime($d)) : ''; }
+// Entrega "a combinar com o cliente": usa uma data-marca no fim do calendario (sem alterar o banco).
+const A_COMBINAR = '9999-12-31';
+function data_br(?string $d): string { return !$d ? '' : ($d === A_COMBINAR ? 'A combinar' : date('d/m/Y', strtotime($d))); }
+// Prioridade pelo prazo: [texto, classe CSS]. Pedidos entregues/cancelados nao tem prazo.
+function prazo(string $d, string $status): array {
+    if (in_array($status, ['entregue','cancelado'], true)) { return ['', '']; }
+    if ($d === A_COMBINAR) { return ['A combinar', 'p-combinar']; }
+    $dias = (int)round((strtotime($d) - strtotime(date('Y-m-d'))) / 86400);
+    if ($dias < 0) { return ['Atrasado ' . (-$dias) . ($dias === -1 ? ' dia' : ' dias'), 'p-atrasado']; }
+    if ($dias === 0) { return ['Hoje', 'p-hoje']; }
+    if ($dias === 1) { return ['Amanhã', 'p-amanha']; }
+    if ($dias <= 7) { return ['Em ' . $dias . ' dias', 'p-semana']; }
+    return ['', ''];
+}
 function qtd_fmt($n): string { $n = (float)$n; return rtrim(rtrim(number_format($n, 2, ',', ''), '0'), ','); }
 function status_nome(string $s): string {
     return ['aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','entregue'=>'Entregue','com_pendencia'=>'Com pendência','cancelado'=>'Cancelado'][$s] ?? $s;
@@ -32,6 +45,6 @@ function status_nome(string $s): string {
 
 // Data padrão das telas: a mais antiga com pedido pendente (ou hoje, se não houver).
 function data_padrao(string $condicao): string {
-    $d = q("SELECT MIN(data_entrega) FROM pedidos WHERE $condicao")->fetchColumn();
+    $d = q("SELECT MIN(data_entrega) FROM pedidos WHERE data_entrega <> ? AND ($condicao)", [A_COMBINAR])->fetchColumn();
     return $d ?: date('Y-m-d');
 }

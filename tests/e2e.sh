@@ -81,3 +81,11 @@ echo "balcao tenta excluir pedido em rota (bloqueado):"; curl -s -b /tmp/c1 -o /
 echo "admin ve botao definitivo:"; curl -s -b /tmp/ad "$B/pedidos.php?data=$D4" > /tmp/p.html; grep -c 'Excluir definitivamente' /tmp/p.html; T=$(tok </tmp/p.html)
 curl -s -b /tmp/ad -o /dev/null -w "admin exclui: %{redirect_url}\n" -d "csrf=$T&id=$LID" $B/pedido_excluir.php
 php tests/sql.php -q "select 'pedido='||(select count(*) from pedidos where id=$LID)||' itens='||(select count(*) from itens_pedido where pedido_id=$LID)||' clientes teste='||(select count(*) from clientes where nome='Teste Limpeza')||' rotas vazias='||(select count(*) from rotas where id not in (select rota_id from pedidos where rota_id is not null)) as s"
+echo "-- DATA A COMBINAR:"
+T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
+curl -s -b /tmp/c1 -o /dev/null -w "criar a combinar: %{redirect_url}\n" --data-urlencode "csrf=$T" --data-urlencode "nome=Cliente Prazo Aberto" --data-urlencode "endereco=Rua Calma 3" --data-urlencode "vendedor=Bruno" --data-urlencode "a_combinar=1" --data-urlencode "qtd[]=2" --data-urlencode "un[]=cx" --data-urlencode "desc[]=Piso Z" $B/pedido_novo.php
+php tests/sql.php -q "select 'data gravada: '||data_entrega as s from pedidos order by id desc limit 1"
+echo "aparece em 'a combinar':"; curl -s -b /tmp/c1 "$B/pedidos.php?status=a_combinar" | grep -o 'Cliente Prazo Aberto' | head -1
+echo "painel conta a combinar:"; curl -s -b /tmp/c3 $B/index.php | grep -o '<strong class="num">[0-9]*</strong><span>Data a combinar' | sed 's/<[^>]*>/ /g'
+echo "separacao/rota nao quebram:"; curl -s -b /tmp/c2 -o /dev/null -w "%{http_code} " $B/separacao.php; curl -s -b /tmp/c3 -o /dev/null -w "%{http_code}\n" $B/rota.php
+echo "busca:"; curl -s -b /tmp/c1 "$B/pedidos.php?busca=Prazo+Aberto" | grep -c 'Cliente Prazo Aberto'

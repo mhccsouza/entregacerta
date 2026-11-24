@@ -211,3 +211,36 @@ table.rota input[type=text],table.rota input:not([type=checkbox]){max-width:80px
 .barra-fixa button,.barra-fixa .btn{flex:1 1 0;width:auto;margin:0}
 @media(min-width:760px){.barra-fixa button,.barra-fixa .btn{flex:0 0 auto;min-width:160px}}
 @media(max-width:900px){.usuario .quem{display:none}}
+
+/* ---------- Lista de pedidos (compacta, por prioridade) ---------- */
+.marcar{display:flex;align-items:center;gap:10px;font-weight:600;margin:10px 0 0;cursor:pointer}
+.nota[hidden],.chips[hidden]{display:none}
+.lista-ped{background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);box-shadow:var(--sombra);overflow:hidden}
+.lista-cab,.ped>summary{display:grid;grid-template-columns:150px minmax(0,2fr) minmax(0,1fr) 110px 170px;gap:10px;align-items:center;padding:10px 14px}
+.lista-cab{background:var(--verde-cl);font-size:.8rem;font-weight:600;color:var(--verde-esc)}
+.ped{border-top:1px solid var(--linha);border-left:5px solid transparent}
+.ped>summary{cursor:pointer;list-style:none;min-height:52px}
+.ped>summary::-webkit-details-marker{display:none}
+.ped>summary:hover{background:#f5f8f4}
+.ped[open]>summary{background:#f0f5ef}
+.ped .det{padding:4px 14px 14px 14px;background:#fbfcfa;border-top:1px dashed var(--linha)}
+.ped.p-atrasado{border-left-color:var(--com_pendencia)}.ped.p-hoje{border-left-color:var(--aguardando)}
+.ped.p-amanha{border-left-color:#d4a017}.ped.p-semana{border-left-color:var(--separado)}.ped.p-combinar{border-left-color:#8a93a0}
+.c-data b{display:block;font-variant-numeric:tabular-nums}
+.c-bairro,.c-itens{color:var(--suave);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prazo{font-style:normal;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px;display:inline-block;margin-top:2px}
+.prazo.p-atrasado{background:var(--com_pendencia-bg);color:var(--com_pendencia)}
+.prazo.p-hoje{background:var(--aguardando-bg);color:var(--aguardando)}
+.prazo.p-amanha{background:#fef9c3;color:#854d0e}
+.prazo.p-semana{background:var(--separado-bg);color:var(--separado)}
+.ped.p-combinar .c-data b{color:#4b5563;font-style:italic}
+.paginas{display:flex;gap:14px;align-items:center;justify-content:center;margin:16px 0;color:var(--suave);font-size:.9rem}
+.paginas .btn{width:auto}
+.filtros .grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+@media(max-width:900px){
+  .lista-cab{display:none}
+  .ped>summary{grid-template-columns:1fr auto;grid-template-areas:'d s' 'n n' 'b i';gap:4px 10px;padding:10px 12px}
+  .c-data{grid-area:d;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.c-data b{display:inline}
+  .c-st{grid-area:s;justify-self:end}.c-nome{grid-area:n}.c-bairro{grid-area:b}.c-itens{grid-area:i;justify-self:end}
+}
+input:disabled{background:#e4e7e1;color:#8a948c;cursor:not-allowed}
