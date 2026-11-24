@@ -453,3 +453,9 @@ input,select,textarea,button{font-family:inherit}
 .alertas .al b{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--cor,#64748b);color:#fff;font-size:.85rem;padding:0 8px;flex:none}
 .alertas .ok-tudo{padding:12px 14px;background:#e8f5ec;border-radius:10px;color:#14532d;margin:8px 0 0}
 @media print{.aviso-novo{display:none!important}}
+
+/* separação: abas simples para quem tem pouca prática com filtros */
+.sep-abas{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 6px}
+.aba{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px;border:2px solid #cbd5c9;border-radius:12px;background:#fff;color:var(--tinta);font-weight:700;text-decoration:none;font-size:1rem}
+.aba b{min-width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#e1e6de;font-size:.85rem;padding:0 8px}
+.aba.on{background:#0f4a24;border-color:#0f4a24;color:#fff}.aba.on b{background:#fff;color:#0f4a24}
