@@ -1,10 +1,26 @@
 <?php
 define('INC', is_dir(__DIR__ . '/inc') ? __DIR__ . '/inc' : __DIR__ . '/../inc'); // funciona com inc/ ao lado ou acima
 require_once INC . '/layout.php';
-$u = topo('Novo pedido (entrega gratuita)', ['balcao']);
+exige_login(['balcao']);
+$id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+$u = topo($id ? 'Editar pedido #' . $id : 'Novo pedido (entrega gratuita)', ['balcao']);
 $erros = [];
+$bloqueado = '';
+if ($id) {
+    $ped = q('SELECT p.*, c.nome, c.telefone, c.endereco, c.bairro, c.referencia FROM pedidos p JOIN clientes c ON c.id = p.cliente_id WHERE p.id = ?', [$id])->fetch();
+    if (!$ped) { $bloqueado = 'Pedido não encontrado.'; }
+    elseif ($ped['status'] !== 'aguardando' || (int)q('SELECT COUNT(*) FROM itens_pedido WHERE pedido_id = ? AND separado = 1', [$id])->fetchColumn() > 0) {
+        $bloqueado = 'Este pedido já foi separado ou entrou em rota e não pode mais ser editado.';
+    }
+    if ($bloqueado) { echo '<p class="erro">' . h($bloqueado) . '</p><p><a class="btn sec" href="pedidos.php">Voltar</a></p>'; rodape(); exit; }
+}
 $v = ['nome'=>'','telefone'=>'','endereco'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];
 $itens = [['qtd'=>'','un'=>'cx','desc'=>'']];
+if ($id && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    foreach (['nome','telefone','endereco','bairro','referencia','vendedor','data_entrega','observacao'] as $k) { $v[$k] = (string)($ped[$k] ?? ''); }
+    $itens = [];
+    foreach (q('SELECT quantidade, unidade, descricao FROM itens_pedido WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll() as $i) { $itens[] = ['qtd'=>qtd_fmt($i['quantidade']), 'un'=>$i['unidade'], 'desc'=>$i['descricao']]; }
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_ok();
     foreach ($v as $k => $_) { $v[$k] = trim($_POST[$k] ?? ''); }
@@ -34,8 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 q('INSERT INTO clientes (nome, telefone, endereco, bairro, referencia) VALUES (?,?,?,?,?)', [$v['nome'],$v['telefone'],$v['endereco'],$v['bairro'],$v['referencia']]);
                 $cid = (int)$pdo->lastInsertId();
             }
-            q('INSERT INTO pedidos (cliente_id, vendedor, data_entrega, observacao, criado_por) VALUES (?,?,?,?,?)', [$cid,$v['vendedor'],$v['data_entrega'],$v['observacao'],$u['id']]);
-            $pid = (int)$pdo->lastInsertId();
+            if ($id) {
+                q('UPDATE pedidos SET cliente_id = ?, vendedor = ?, data_entrega = ?, observacao = ? WHERE id = ?', [$cid,$v['vendedor'],$v['data_entrega'],$v['observacao'],$id]);
+                q('DELETE FROM itens_pedido WHERE pedido_id = ?', [$id]);
+                $pid = $id;
+            } else {
+                q('INSERT INTO pedidos (cliente_id, vendedor, data_entrega, observacao, criado_por) VALUES (?,?,?,?,?)', [$cid,$v['vendedor'],$v['data_entrega'],$v['observacao'],$u['id']]);
+                $pid = (int)$pdo->lastInsertId();
+            }
             foreach ($itens as $it) { q('INSERT INTO itens_pedido (pedido_id, quantidade, unidade, descricao) VALUES (?,?,?,?)', [$pid,(float)$it['qtd'],$it['un'],$it['desc']]); }
             $pdo->commit();
             header('Location: pedidos.php?data=' . urlencode($v['data_entrega']) . '&ok=' . $pid); exit;
@@ -46,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'=>'peça(s)','par'=>'par(es)','m2'=>'m²'];
 ?>
 <?php foreach ($erros as $e): ?><p class="erro"><?= h($e) ?></p><?php endforeach; ?>
-<form method="post"><?= csrf_campo() ?>
+<form method="post"><?= csrf_campo() ?><?php if ($id): ?><input type="hidden" name="id" value="<?= $id ?>"><?php endif; ?>
 <div class="card"><h2 style="margin-top:0">Entrega</h2><div class="grid">
 <div><label for="nome">Cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" required></div>
 <div><label for="telefone">Telefone</label><input id="telefone" name="telefone" inputmode="tel" value="<?= h($v['telefone']) ?>"></div>
@@ -64,7 +86,7 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 <button type="button" class="sec" onclick="this.parentNode.remove()" aria-label="Remover item">×</button></div>
 <?php endforeach; ?></div>
 <button type="button" class="sec" id="add">+ Adicionar item</button></div>
-<p><button>Salvar pedido</button></p></form>
+<p><button><?= $id ? 'Salvar alterações' : 'Salvar pedido' ?></button></p></form>
 <script>
 document.getElementById('add').onclick=function(){var d=document.getElementById('itens'),n=d.firstElementChild.cloneNode(true);
 n.querySelectorAll('input').forEach(function(i){i.value=''});d.appendChild(n);n.querySelector('input').focus();};

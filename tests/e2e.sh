@@ -34,3 +34,19 @@ curl -s -b /tmp/c3 $B/pendencias.php > /tmp/pen.html; T=$(tok </tmp/pen.html)
 curl -s -b /tmp/c3 -o /dev/null --data "csrf=$T&id=1&pedido_id=1" $B/pendencias.php
 php tests/sql.php -q "select 'pedido '||id||' '||status as s from pedidos where id=1"
 echo "-- painel:"; curl -s -b /tmp/c3 $B/index.php | grep -o '<strong style="font-size:1.8rem">[0-9]*</strong><br>[^<]*' | sed 's/<[^>]*>/ /g'
+echo "-- EDITAR / EXCLUIR (balcao):"
+D2=$(date -d "+2 day" +%F)
+T=$(curl -s -b /tmp/c1 $B/pedido_novo.php | tok)
+curl -s -b /tmp/c1 -o /dev/null --data-urlencode "csrf=$T" --data-urlencode "nome=Cliente Editar" --data-urlencode "endereco=Rua Errada 1" --data-urlencode "vendedor=Ione" --data-urlencode "data_entrega=$D2" --data-urlencode "qtd[]=1" --data-urlencode "un[]=un" --data-urlencode "desc[]=Item errado" $B/pedido_novo.php
+NID=$(php tests/sql.php -q "select max(id) as m from pedidos")
+curl -s -b /tmp/c1 "$B/pedido_novo.php?id=$NID" | grep -o 'value="Rua Errada 1"\|Editar pedido #[0-9]*\|value="Item errado"' | sort -u
+T=$(curl -s -b /tmp/c1 "$B/pedido_novo.php?id=$NID" | tok)
+curl -s -b /tmp/c1 -o /dev/null -w "salvar edicao: %{http_code}\n" --data-urlencode "csrf=$T" --data-urlencode "id=$NID" --data-urlencode "nome=Cliente Editar" --data-urlencode "endereco=Rua Certa 99" --data-urlencode "vendedor=Bruno" --data-urlencode "data_entrega=$D2" --data-urlencode "qtd[]=3" --data-urlencode "un[]=cx" --data-urlencode "desc[]=Piso certo" $B/pedido_novo.php
+php tests/sql.php -q "select 'pedido '||p.id||' '||c.endereco||' '||p.vendedor||' itens='||(select count(*) from itens_pedido i where i.pedido_id=p.id)||' '||(select descricao from itens_pedido i where i.pedido_id=p.id) as s from pedidos p join clientes c on c.id=p.cliente_id where p.id=$NID"
+echo "pedido 2 (ja em rota) nao pode editar:"; curl -s -b /tmp/c1 "$B/pedido_novo.php?id=2" | grep -o 'não pode mais ser editado'
+echo "balcao ve botao Excluir:"; curl -s -b /tmp/c1 "$B/pedidos.php?data=$D2" | grep -c 'pedido_excluir.php'
+T=$(curl -s -b /tmp/c1 "$B/pedidos.php?data=$D2" | tok)
+curl -s -b /tmp/c1 -o /dev/null -w "excluir: %{http_code} %{redirect_url}\n" -d "csrf=$T&id=$NID" $B/pedido_excluir.php
+php tests/sql.php -q "select 'restam '||count(*)||' pedido(s) com id=$NID; itens: '||(select count(*) from itens_pedido where pedido_id=$NID) as s from pedidos where id=$NID"
+echo "excluir pedido ja em rota (2) -> bloqueado:"; curl -s -b /tmp/c1 -o /dev/null -w "%{redirect_url}\n" -d "csrf=$T&id=2" $B/pedido_excluir.php
+echo "deposito tenta excluir (403):"; curl -s -b /tmp/c2 -o /dev/null -w "%{http_code}\n" -d "csrf=x&id=1" $B/pedido_excluir.php
