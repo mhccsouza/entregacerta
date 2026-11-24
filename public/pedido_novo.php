@@ -141,11 +141,14 @@ cep.addEventListener('input',function(){var d=cep.value.replace(/\D/g,'').slice(
 var dt=document.getElementById('data_entrega');
 function iso(x){var d=new Date();d.setDate(d.getDate()+x);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function marcaData(){document.querySelectorAll('#atalhos-data .chip').forEach(function(c){c.classList.toggle('on',dt.value===iso(+c.dataset.d))})}
-document.getElementById('atalhos-data').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c){dt.value=iso(+c.dataset.d);marcaData()}});
+document.getElementById('atalhos-data').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c){dt.value=iso(+c.dataset.d);dt.classList.remove('campo-erro');marcaData()}});
 dt.addEventListener('input',marcaData);marcaData();
 var ac=document.getElementById('a_combinar');
 function combinar(){dt.disabled=ac.checked;dt.required=!ac.checked;document.getElementById('atalhos-data').hidden=ac.checked;document.getElementById('nota-combinar').hidden=!ac.checked;dt.classList.remove('campo-erro')}
 ac.addEventListener('change',combinar);combinar();
+// tira a borda vermelha assim que o campo é preenchido (digitando, escolhendo ou preenchido pelo CEP)
+function limpaErro(e){var i=e.target;if(i.classList&&i.classList.contains('campo-erro')&&i.value.trim()){i.classList.remove('campo-erro')}}
+document.getElementById('form-pedido').addEventListener('input',limpaErro);document.getElementById('form-pedido').addEventListener('change',limpaErro);
 // validação amigável: foca no primeiro campo faltando
 document.getElementById('form-pedido').addEventListener('submit',function(e){
  var f=['nome','rua','numero','vendedor'].concat(ac.checked?[]:['data_entrega']).map(function(i){return document.getElementById(i)});
