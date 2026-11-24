@@ -14,10 +14,12 @@ if ($id) {
     }
     if ($bloqueado) { echo '<p class="erro">' . h($bloqueado) . '</p><p><a class="btn sec" href="pedidos.php">Voltar</a></p>'; rodape(); exit; }
 }
-$v = ['nome'=>'','telefone'=>'','endereco'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];
+$v = ['nome'=>'','telefone'=>'','endereco'=>'','rua'=>'','numero'=>'','bairro'=>'','referencia'=>'','vendedor'=>'','data_entrega'=>date('Y-m-d', strtotime('+1 day')),'observacao'=>''];
 $itens = [['qtd'=>'','un'=>'cx','desc'=>'']];
 if ($id && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     foreach (['nome','telefone','endereco','bairro','referencia','vendedor','data_entrega','observacao'] as $k) { $v[$k] = (string)($ped[$k] ?? ''); }
+    // o banco guarda "Rua, número" em um campo só; aqui separamos de volta para a tela
+    if (preg_match('/^(.*),\s*(\d[\w\/-]*|s\/?n)$/iu', $v['endereco'], $m)) { $v['rua'] = trim($m[1]); $v['numero'] = $m[2]; } else { $v['rua'] = $v['endereco']; }
     $itens = [];
     foreach (q('SELECT quantidade, unidade, descricao FROM itens_pedido WHERE pedido_id = ? ORDER BY id', [$id])->fetchAll() as $i) { $itens[] = ['qtd'=>qtd_fmt($i['quantidade']), 'un'=>$i['unidade'], 'desc'=>$i['descricao']]; }
 }
@@ -32,7 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $itens[] = ['qtd'=>$qtd, 'un'=>$un, 'desc'=>$desc];
     }
     if ($v['nome']==='') $erros[] = 'Informe o nome do cliente.';
-    if ($v['endereco']==='') $erros[] = 'Informe o endereço.';
+    $v['endereco'] = $v['rua'] === '' ? '' : $v['rua'] . ($v['numero'] !== '' ? ', ' . $v['numero'] : '');
+    if ($v['rua']==='') $erros[] = 'Informe a rua.';
+    if ($v['numero']==='') $erros[] = 'Informe o número (ou s/n se não houver).';
     if ($v['vendedor']==='') $erros[] = 'Informe o vendedor.';
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $v['data_entrega'])) $erros[] = 'Informe a data da entrega.';
     if (!$itens) $erros[] = 'Inclua ao menos um item.';
@@ -70,14 +74,15 @@ $unidades = ['cx'=>'caixa(s)','sc'=>'saco(s)','kg'=>'kg','un'=>'unidade(s)','pc'
 ?>
 <?php foreach ($erros as $e): ?><p class="erro" role="alert"><?= h($e) ?></p><?php endforeach; ?>
 <form method="post" id="form-pedido" novalidate><?= csrf_campo() ?><?php if ($id): ?><input type="hidden" name="id" value="<?= $id ?>"><?php endif; ?>
-<div class="card"><h2>Cliente e endereço</h2><div class="grid">
-<div><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
-<div><label for="telefone">Telefone / WhatsApp</label><input id="telefone" name="telefone" inputmode="tel" placeholder="(71) 99999-0000" maxlength="16" value="<?= h($v['telefone']) ?>"></div>
-<div><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche o endereço e o bairro sozinho.</p></div>
-<div><label class="req" for="endereco">Endereço (rua e número)</label><input id="endereco" name="endereco" value="<?= h($v['endereco']) ?>" autocomplete="off" required></div>
-<div><label for="bairro">Bairro</label><input id="bairro" name="bairro" list="bairros" value="<?= h($v['bairro']) ?>" autocomplete="off"><datalist id="bairros"><?php foreach (q("SELECT DISTINCT bairro FROM clientes WHERE bairro <> '' ORDER BY bairro")->fetchAll(PDO::FETCH_COLUMN) as $b): ?><option value="<?= h($b) ?>"><?php endforeach; ?></datalist></div>
-</div>
-<label for="referencia">Ponto de referência</label><input id="referencia" name="referencia" value="<?= h($v['referencia']) ?>" placeholder="Ex.: ao lado da padaria, portão azul" autocomplete="off"></div>
+<div class="card"><h2>Cliente e endereço</h2><div class="grid grid-end">
+<div class="g-nome"><label class="req" for="nome">Nome do cliente</label><input id="nome" name="nome" value="<?= h($v['nome']) ?>" autocomplete="off" required <?= $id ? '' : 'autofocus' ?>></div>
+<div class="g-tel"><label for="telefone">Telefone / WhatsApp</label><input id="telefone" name="telefone" inputmode="tel" placeholder="(71) 99999-0000" maxlength="16" value="<?= h($v['telefone']) ?>"></div>
+<div class="g-cep"><label for="cep">CEP <span class="nota sem-margem">(opcional)</span></label><input id="cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="postal-code"><p class="nota sem-margem" id="cep-msg" aria-live="polite">Preenche rua e bairro.</p></div>
+<div class="g-rua"><label class="req" for="rua">Rua</label><input id="rua" name="rua" value="<?= h($v['rua']) ?>" autocomplete="off" required></div>
+<div class="g-num"><label class="req" for="numero">Número</label><input id="numero" name="numero" value="<?= h($v['numero']) ?>" maxlength="12" placeholder="s/n" autocomplete="off" required></div>
+<div class="g-bairro"><label for="bairro">Bairro</label><input id="bairro" name="bairro" list="bairros" value="<?= h($v['bairro']) ?>" autocomplete="off"><datalist id="bairros"><?php foreach (q("SELECT DISTINCT bairro FROM clientes WHERE bairro <> '' ORDER BY bairro")->fetchAll(PDO::FETCH_COLUMN) as $b): ?><option value="<?= h($b) ?>"><?php endforeach; ?></datalist></div>
+<div class="g-ref"><label for="referencia">Ponto de referência</label><input id="referencia" name="referencia" value="<?= h($v['referencia']) ?>" placeholder="Ex.: ao lado da padaria, portão azul" autocomplete="off"></div>
+</div></div>
 
 <div class="card"><h2>Entrega e venda</h2><div class="grid">
 <?php $comb = $v['data_entrega'] === A_COMBINAR; ?>
@@ -127,12 +132,11 @@ cep.addEventListener('input',function(){var d=cep.value.replace(/\D/g,'').slice(
  if(d.length<8){cepUlt='';return}if(d===cepUlt)return;cepUlt=d;cepMsg.textContent='Buscando o CEP...';
  var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort()},6000);
  fetch('https://viacep.com.br/ws/'+d+'/json/',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){clearTimeout(tm);
-  if(j.erro){cepMsg.textContent='CEP não encontrado. Preencha o endereço manualmente.';return}
-  var en=document.getElementById('endereco'),ba=document.getElementById('bairro');
-  if(!en.value.trim()&&j.logradouro){en.value=j.logradouro+', ';}
-  if(!ba.value.trim()&&j.bairro){ba.value=j.bairro;}
-  cepMsg.textContent='Endereço preenchido. Confira e informe o número.';if(!en.value.trim()||/, $/.test(en.value)){en.focus();en.setSelectionRange(en.value.length,en.value.length)}
- }).catch(function(){clearTimeout(tm);cepMsg.textContent='Não foi possível consultar o CEP agora. Preencha o endereço manualmente.'})});
+  if(j.erro){cepMsg.textContent='CEP não encontrado. Preencha a rua manualmente.';return}
+  var ru=document.getElementById('rua'),nu=document.getElementById('numero'),ba=document.getElementById('bairro');
+  ru.value=j.logradouro||'';nu.value='';ba.value=j.bairro||'';ru.classList.remove('campo-erro');ba.classList.remove('campo-erro');
+  cepMsg.textContent=j.logradouro?'Preenchido. Informe o número.':'CEP sem rua (CEP geral da cidade). Informe a rua.';(j.logradouro?nu:ru).focus()
+ }).catch(function(){clearTimeout(tm);cepMsg.textContent='Não foi possível consultar o CEP agora. Preencha a rua manualmente.'})});
 // atalhos de data
 var dt=document.getElementById('data_entrega');
 function iso(x){var d=new Date();d.setDate(d.getDate()+x);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -144,7 +148,7 @@ function combinar(){dt.disabled=ac.checked;dt.required=!ac.checked;document.getE
 ac.addEventListener('change',combinar);combinar();
 // validação amigável: foca no primeiro campo faltando
 document.getElementById('form-pedido').addEventListener('submit',function(e){
- var f=['nome','endereco','vendedor'].concat(ac.checked?[]:['data_entrega']).map(function(i){return document.getElementById(i)});
+ var f=['nome','rua','numero','vendedor'].concat(ac.checked?[]:['data_entrega']).map(function(i){return document.getElementById(i)});
  var falta=null;f.forEach(function(i){var vazio=!i.value.trim();i.classList.toggle('campo-erro',vazio);if(vazio&&!falta)falta=i});
  if(falta){e.preventDefault();falta.focus()}});
 })();
