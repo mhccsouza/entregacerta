@@ -75,8 +75,8 @@ if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['blo
 <div><label for="vendedor">Vendedor</label><select id="vendedor" name="vendedor" onchange="this.form.submit()"><option value="">Todos</option><?php foreach ($nomesVend as $nv): ?><option value="<?= h($nv) ?>" <?= $vend === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select></div>
 <div><label for="status">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option>
 <?php foreach (['a_combinar'=>'Data a combinar','aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','com_pendencia'=>'Com pendência','entregue'=>'Entregue','cancelado'=>'Cancelado'] as $k => $n): ?><option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= h($n) ?></option><?php endforeach; ?></select></div>
-<div><label for="de">Entrega de</label><input id="de" type="date" name="de" value="<?= h($de) ?>"></div>
-<div><label for="ate">até</label><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"></div></div>
+<div><label for="de">Entrega de</label><div class="data-w<?= $de ? '' : ' sem-data' ?>"><input id="de" type="date" name="de" value="<?= h($de) ?>"><span class="ph" aria-hidden="true">Escolher data</span></div></div>
+<div><label for="ate">até</label><div class="data-w<?= $ate ? '' : ' sem-data' ?>"><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"><span class="ph" aria-hidden="true">Escolher data</span></div></div></div>
 <div class="prio-barra" role="group" aria-label="Filtrar por prioridade"><?php foreach ($prios as $k => $nome): $on = $prio === $k;
 $q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $status, 'busca' => $busca, 'de' => $de, 'ate' => $ate]); ?>
 <a class="prio <?= $classe[$k] ?><?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php' . ($q2 ? '?' . http_build_query($q2) : '')) ?>"><i></i><?= h($nome) ?><b><?= $contagem[$k] ?></b></a><?php endforeach; ?></div>
@@ -124,4 +124,9 @@ $mostrar = array_unique(array_filter(array_merge([1, $paginas], range(max(1, $pa
 </nav>
 <p class="nota centro">Página <?= $pag ?> de <?= $paginas ?> · mostrando <?= ($pag - 1) * $por + 1 ?> a <?= min($total, $pag * $por) ?> de <?= $total ?> pedidos</p>
 <?php endif; ?>
-<?php endif; rodape();
+<?php endif; ?>
+<script>
+document.querySelectorAll('.data-w').forEach(function(w){var i=w.querySelector('input');
+ function at(){w.classList.toggle('sem-data',!i.value)}i.addEventListener('input',at);i.addEventListener('change',at);at();});
+</script>
+<?php rodape();
