@@ -15,7 +15,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Instalação</title><link rel="stylesheet" href="style.css"></head>
-<body><main style="max-width:420px"><h1>Instalação – usuários</h1>
+<body><main class="estreito"><h1>Instalação – usuários</h1>
 <?php if ($msg): ?><p class="<?= $feito ? 'ok' : 'erro' ?>"><?= h($msg) ?></p><?php endif; ?>
 <?php if (!$feito): ?><form method="post" class="card"><?= csrf_campo() ?>
 <?php foreach ($perfis as $k => $nome): ?><label for="s_<?= $k ?>">Senha de <?= h($nome) ?> (login: <?= $k ?>)</label><input id="s_<?= $k ?>" name="s_<?= $k ?>" type="password" autocomplete="new-password" required><?php endforeach; ?>

@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 if ($msg): ?><p class="ok" role="status"><?= h($msg) ?></p><?php endif; if ($erro): ?><p class="erro" role="alert"><?= h($erro) ?></p><?php endif; ?>
-<form method="post" class="card" style="max-width:520px"><?= csrf_campo() ?><input type="hidden" name="acao" value="novo">
-<h2>Novo vendedor</h2><label for="nv" style="margin-top:0">Nome</label><input id="nv" name="nome" maxlength="60" required autocomplete="off" placeholder="Ex.: Carla">
+<form method="post" class="card estreito um-campo"><?= csrf_campo() ?><input type="hidden" name="acao" value="novo">
+<h2>Novo vendedor</h2><label for="nv">Nome</label><input id="nv" name="nome" maxlength="60" required autocomplete="off" placeholder="Ex.: Carla">
 <div class="barra"><button>Cadastrar vendedor</button></div></form>
 <h2>Equipe de vendas</h2>
 <?php $lista = q('SELECT v.id, v.nome, (SELECT COUNT(*) FROM pedidos p WHERE p.vendedor = v.nome) AS n FROM vendedores v ORDER BY v.nome')->fetchAll();

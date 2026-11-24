@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $ps = q("SELECT p.*, c.nome, c.bairro FROM pedidos p JOIN clientes c ON c.id = p.cliente_id WHERE p.data_entrega = ? AND p.status IN ('aguardando','separado') ORDER BY p.id", [$data])->fetchAll();
 if (!empty($_GET['salvo'])): ?><p class="ok" role="status">Separação salva.</p><?php endif; ?>
-<form method="get" class="no-print card"><label for="data" style="margin-top:0">Data da entrega</label><input id="data" type="date" name="data" value="<?= h($data) ?>" onchange="this.form.submit()"></form>
+<form method="get" class="no-print card um-campo"><label for="data">Data da entrega</label><input id="data" type="date" name="data" value="<?= h($data) ?>" onchange="this.form.submit()"></form>
 <?php if (!$ps): ?><div class="vazio"><p>Nenhum pedido para separar nesta data.</p><a class="btn sec" href="pedidos.php">Ver pedidos</a></div><?php else: ?>
 <form method="post"><?= csrf_campo() ?><input type="hidden" name="data" value="<?= h($data) ?>">
 <div class="cards"><?php foreach ($ps as $p): ?><div class="card sep"><div class="pedido-cab"><strong>Pedido #<?= $p['id'] ?> · <?= h($p['nome']) ?></strong> <?= stag($p['status']) ?></div>

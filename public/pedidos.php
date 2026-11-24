@@ -54,16 +54,16 @@ if (!empty($_GET['cancelado'])): ?><p class="ok">Pedido #<?= (int)$_GET['cancela
 if (!empty($_GET['naocancelado'])): ?><p class="erro">Não foi possível cancelar o pedido #<?= (int)$_GET['naocancelado'] ?>. Informe o motivo; só pedidos ainda não entregues podem ser cancelados.</p><?php endif;
 if (!empty($_GET['bloqueado'])): ?><p class="erro">O pedido #<?= (int)$_GET['bloqueado'] ?> já foi separado ou entrou em rota e só o administrador pode excluí-lo.</p><?php endif; ?>
 <form method="get" class="no-print card filtros"><div class="grid">
-<div class="f-larga"><label for="busca" style="margin-top:0">Buscar</label><input id="busca" type="search" name="busca" value="<?= h($busca) ?>" placeholder="Cliente, endereço, bairro ou nº"></div>
-<div><label for="vendedor" style="margin-top:0">Vendedor</label><select id="vendedor" name="vendedor" onchange="this.form.submit()"><option value="">Todos</option><?php foreach ($nomesVend as $nv): ?><option value="<?= h($nv) ?>" <?= $vend === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select></div>
-<div><label for="status" style="margin-top:0">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option>
+<div class="f-larga"><label for="busca">Buscar</label><input id="busca" type="search" name="busca" value="<?= h($busca) ?>" placeholder="Cliente, endereço, bairro ou nº"></div>
+<div><label for="vendedor">Vendedor</label><select id="vendedor" name="vendedor" onchange="this.form.submit()"><option value="">Todos</option><?php foreach ($nomesVend as $nv): ?><option value="<?= h($nv) ?>" <?= $vend === $nv ? 'selected' : '' ?>><?= h($nv) ?></option><?php endforeach; ?></select></div>
+<div><label for="status">Situação</label><select id="status" name="status" onchange="this.form.submit()"><option value="">Em aberto</option>
 <?php foreach (['a_combinar'=>'Data a combinar','aguardando'=>'Aguardando separação','separado'=>'Separado','em_rota'=>'Em rota','com_pendencia'=>'Com pendência','entregue'=>'Entregue','cancelado'=>'Cancelado'] as $k => $n): ?><option value="<?= $k ?>" <?= $status === $k ? 'selected' : '' ?>><?= h($n) ?></option><?php endforeach; ?></select></div>
-<div><label for="de" style="margin-top:0">Entrega de</label><input id="de" type="date" name="de" value="<?= h($de) ?>"></div>
-<div><label for="ate" style="margin-top:0">até</label><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"></div></div>
+<div><label for="de">Entrega de</label><input id="de" type="date" name="de" value="<?= h($de) ?>"></div>
+<div><label for="ate">até</label><input id="ate" type="date" name="ate" value="<?= h($ate) ?>"></div></div>
 <div class="chips"><?php $atalhos = ['Hoje' => [$hoje, $hoje], 'Amanhã' => [date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+1 day'))], 'Próximos 7 dias' => [$hoje, date('Y-m-d', strtotime('+7 day'))], 'Esta semana' => [date('Y-m-d', strtotime('monday this week')), date('Y-m-d', strtotime('sunday this week'))]];
 foreach ($atalhos as $nome => [$d1, $d2]): $on = $de === $d1 && $ate === $d2; ?><a class="chip<?= $on ? ' on' : '' ?>" href="<?= h('pedidos.php?' . http_build_query(array_filter(['de' => $d1, 'ate' => $d2, 'vendedor' => $vend, 'status' => $status, 'busca' => $busca]))) ?>"><?= h($nome) ?></a><?php endforeach; ?></div>
 <div class="barra"><button class="peq">Filtrar</button><?php if ($filtrado): ?><a class="btn sec peq" href="pedidos.php">Limpar filtros</a><?php endif; ?>
-<span class="nota" style="margin:0"><?= $total ?> <?= $total === 1 ? 'pedido' : 'pedidos' ?><?= $vend !== '' ? ' de ' . h($vend) : '' ?></span></div></form>
+<span class="nota sem-margem"><?= $total ?> <?= $total === 1 ? 'pedido' : 'pedidos' ?><?= $vend !== '' ? ' de ' . h($vend) : '' ?></span></div></form>
 <?php if (!$ps): ?><div class="vazio"><p>Nenhum pedido encontrado.</p><?php if (in_array($u['perfil'], ['admin','balcao'], true)): ?><a class="btn" href="pedido_novo.php">+ Cadastrar pedido</a><?php endif; ?></div><?php endif; ?>
 <?php if ($ps): $grupoAtual = null; $agrupar = !in_array($status, ['entregue','cancelado'], true) && !$de && !$ate; ?>
 <div class="cards compactos">
@@ -104,6 +104,6 @@ $mostrar = array_unique(array_filter(array_merge([1, $paginas], range(max(1, $pa
 <?php endforeach; ?>
 <?php if ($pag < $paginas): ?><a class="pg" href="<?= h(link_pag($pag + 1)) ?>" aria-label="Próxima página">›</a><?php endif; ?>
 </nav>
-<p class="nota" style="text-align:center">Página <?= $pag ?> de <?= $paginas ?> · mostrando <?= ($pag - 1) * $por + 1 ?> a <?= min($total, $pag * $por) ?> de <?= $total ?> pedidos</p>
+<p class="nota centro">Página <?= $pag ?> de <?= $paginas ?> · mostrando <?= ($pag - 1) * $por + 1 ?> a <?= min($total, $pag * $por) ?> de <?= $total ?> pedidos</p>
 <?php endif; ?>
 <?php endif; rodape();

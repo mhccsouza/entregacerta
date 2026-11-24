@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $livres = q("SELECT p.*, c.nome, c.endereco, c.bairro FROM pedidos p JOIN clientes c ON c.id = p.cliente_id WHERE p.data_entrega = ? AND p.rota_id IS NULL AND p.status IN ('aguardando','separado') ORDER BY c.bairro, p.id", [$data])->fetchAll();
 $rotas = q('SELECT * FROM rotas WHERE data_rota = ? ORDER BY id', [$data])->fetchAll();
 ?>
-<form method="get" class="no-print card"><label for="data" style="margin-top:0">Data</label><input id="data" type="date" name="data" value="<?= h($data) ?>" onchange="this.form.submit()"></form>
+<form method="get" class="no-print card um-campo"><label for="data">Data</label><input id="data" type="date" name="data" value="<?= h($data) ?>" onchange="this.form.submit()"></form>
 <?php if ($livres): ?><form method="post" class="no-print"><?= csrf_campo() ?><input type="hidden" name="data" value="<?= h($data) ?>">
-<h2>Pedidos sem rota</h2><p class="nota" style="margin:-4px 0 10px">Marque os pedidos desta saída e, se quiser, indique a ordem das paradas (1, 2, 3…).</p>
+<h2>Pedidos sem rota</h2><p class="nota intro">Marque os pedidos desta saída e, se quiser, indique a ordem das paradas (1, 2, 3…).</p>
 <div class="sel-lista"><?php foreach ($livres as $p): $falta = (int)q('SELECT COUNT(*) FROM itens_pedido WHERE pedido_id = ? AND separado = 0', [$p['id']])->fetchColumn(); ?>
 <div class="sel-card"><input type="checkbox" name="pedido[]" value="<?= $p['id'] ?>" id="p<?= $p['id'] ?>" aria-label="Incluir pedido <?= $p['id'] ?>">
 <label for="p<?= $p['id'] ?>" class="sel-info"><strong>#<?= $p['id'] ?> · <?= h($p['nome']) ?></strong><span><?= h($p['endereco']) ?> – <?= h($p['bairro']) ?></span>
