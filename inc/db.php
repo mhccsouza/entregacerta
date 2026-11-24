@@ -8,6 +8,8 @@ function db(): PDO {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             ]);
+            // o MySQL da hospedagem usa UTC: alinha o relógio do banco ao do sistema (America/Bahia) para a hora de cadastro sair certa
+            if (strpos(DB_DSN, 'mysql') === 0) { $pdo->exec("SET time_zone = '" . date('P') . "'"); }
         } catch (Throwable $e) {
             http_response_code(500);
             error_log('EntregaCerta: falha ao conectar ao banco: ' . $e->getMessage());
