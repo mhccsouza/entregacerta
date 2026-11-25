@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $erro = 'Usuário ou senha incorretos. Confira os dados e tente de novo.';
 }
-?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f4a24"><title>Entrar – <?= h(NOME_SISTEMA) ?></title><link rel="stylesheet" href="style.css?v=<?= (int)@filemtime(__DIR__ . '/style.css') ?>"></head>
+?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f4a24"><title>Entrar – <?= h(NOME_SISTEMA) ?></title><link rel="stylesheet" href="style.css?v=<?= (int)@filemtime(__DIR__ . '/style.css') ?>"></head>
 <body class="login">
 <aside class="login-lado" aria-hidden="true">
   <h2>Do talão de papel ao pedido organizado</h2>

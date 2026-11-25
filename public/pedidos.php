@@ -94,7 +94,7 @@ $q2 = array_filter(['prio' => $on ? '' : $k, 'vendedor' => $vend, 'status' => $s
 <div class="linha-prazo"><?= $pz && $p['data_entrega'] !== A_COMBINAR ? '<em class="prazo ' . $pzc . '">' . h($pz) . '</em>' : ($p['data_entrega'] === A_COMBINAR ? '<em class="prazo p-combinar">Aguardando definição</em>' : '') ?></div>
 <p class="ped-nome"><strong>#<?= $p['id'] ?> · <?= h($p['nome']) ?></strong></p>
 <p class="meta"><?= h($p['bairro'] ?: 'Sem bairro') ?> · <b><?= h($p['vendedor']) ?></b></p>
-<p class="resumo-it"><?= $its ? qtd_fmt($its[0]['quantidade']) . ' ' . h($its[0]['unidade']) . ' ' . h($its[0]['descricao']) : 'Sem itens' ?><?= count($its) > 1 ? ' <span class="mais-n">+' . (count($its) - 1) . '</span>' : '' ?></p>
+<p class="resumo-it"><span class="rt"><?= $its ? qtd_fmt($its[0]['quantidade']) . ' ' . h($its[0]['unidade']) . ' ' . h($its[0]['descricao']) : 'Sem itens' ?></span><?= count($its) > 1 ? '<span class="mais-n">+' . (count($its) - 1) . '</span>' : '' ?></p>
 <details class="mais"><summary>Detalhes e ações</summary>
 <p class="meta"><?= h($p['endereco']) ?><?= $p['bairro'] ? ' – ' . h($p['bairro']) : '' ?><?= $p['referencia'] ? '<br>Ref.: ' . h($p['referencia']) : '' ?><?= $p['telefone'] ? '<br>Tel.: ' . h($p['telefone']) : '' ?></p>
 <table class="itens"><?php foreach ($its as $i): ?><tr><td><?= qtd_fmt($i['quantidade']) ?> <?= h($i['unidade']) ?></td><td><?= h($i['descricao']) ?></td></tr><?php endforeach; ?></table>

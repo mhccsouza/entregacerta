@@ -561,3 +561,49 @@ input.campo-erro:focus,select.campo-erro:focus,textarea.campo-erro:focus{border-
 .login-in .senha-w input{flex:1;min-width:0;padding-right:12px}
 .login-in .senha-w button{position:static;flex:none;min-height:0;padding:0 14px;border:1px solid var(--linha);background:#fff;color:var(--verde-esc)}
 .login-in input.campo-erro:focus{border-color:var(--com_pendencia)!important;box-shadow:0 0 0 3px rgba(185,28,28,.18)!important}
+
+/* ---------- Celular: nada ultrapassa a largura da tela ---------- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+main{overflow-wrap:break-word}
+/* Itens de grade e de linha podem encolher (sem isso, um texto longo alarga o cartão além da tela) */
+.cards>*,.card,.pedido-cab>*,.linha-prazo>*{min-width:0}
+.card{max-width:100%}
+/* Cartões: ocupam a largura disponível (1 coluna no celular em pé; mais colunas quando cabem); um cartão sozinho não vira uma faixa gigante */
+.cards{grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
+.cards>.card:only-child{max-width:720px}
+.cards.compactos{grid-template-columns:repeat(auto-fill,minmax(min(290px,100%),1fr))}
+@media(max-width:759px){.cards.compactos{grid-template-columns:minmax(0,1fr)}}
+/* Nome, endereço e itens longos quebram em vez de empurrar a tela para o lado */
+.pedido-cab strong,.ped-nome,.meta,.resumo-it,.card p,.card li,.card h2,.card h3{overflow-wrap:anywhere}
+.cards.compactos .ped-nome,.ped-card .meta,.resumo-it{overflow-wrap:normal}
+table{max-width:100%}
+table.itens{width:100%}
+table.itens th,table.itens td{overflow-wrap:anywhere;word-break:normal}
+@media(max-width:759px){
+  main{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .card{padding:14px}
+  .cabeca{align-items:stretch}
+}
+/* Resumo do item: o texto encurta com "…" e o contador "+N" continua visível */
+.resumo-it{display:flex;align-items:center;gap:6px}
+.resumo-it .rt{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resumo-it .mais-n{flex:none;margin-left:0}
+
+/* ---------- Celular deitado e telas com notch ---------- */
+.nav{position:relative}
+.topo-in{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+main{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:max(48px,calc(24px + env(safe-area-inset-bottom)))}
+@media(max-width:759px){
+  .topo-in{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .nav{margin-left:calc(-1 * max(12px,env(safe-area-inset-left)));margin-right:calc(-1 * max(12px,env(safe-area-inset-right)))}
+}
+/* Pouca altura (celular deitado): cabeçalho e barra de ações deixam de ficar fixos para sobrar espaço de leitura */
+@media(max-height:520px) and (orientation:landscape){
+  .topo{position:static}
+  .topo-in{min-height:48px;gap:12px}
+  .nav a{padding:13px 9px;font-size:.88rem}
+  .barra-fixa{position:static;background:none;padding:12px 0 0}
+  main{padding-top:14px}
+  h1{font-size:1.35rem}
+  .cabeca{margin-bottom:10px}
+}
